@@ -7,7 +7,7 @@
 #include<utility>
 #include<cassert>
 #include<functional>
-#include"Header.h"
+#include"Macros.h"
 _PANAGIOTIS_BEGIN
 template<typename _Ty>
 class vector {
@@ -239,10 +239,61 @@ public:
 			std::swap(_capacity, other._capacity);
 		}
 	}
-	//reserve func
-	void reserve(const std::size_t capacity) {
-		if (capacity <= _capacity)return;
+	//reserve func done
+	void reserve(const std::size_t new_capacity) {
+		if (new_capacity > _capacity) {
+			_Ty** new_array = new _Ty * [new_capacity] {};
+			for (std::size_t i = 0; i < _size; i++) {
+				new_array[i] = _array[i];
+			}
+			if (_array != nullptr) {
+				delete[]_array;
+			}
+			_array = new_array;
+			_capacity = new_capacity;
+		}
+		return;
+	}
+	//shring_to_fit func done
+	void shrink_to_fit() {
+		if (_size == _capacity) return;
+		if (_size == 0) {
+			delete[] _array;
+			_array = nullptr;
+			_capacity = 0;
+			return;
+		}
+		_Ty** new_array = new _Ty * [_size] {};
+		for (std::size_t i = 0; i < _size; i++) {
+			new_array[i] = _array[i];
+		}
+		delete[]_array;
+		_array = new_array;
+		_capacity = _size;
+	}
+	//
+	void resize(const std::size_t new_size) {
+		if (_size == new_size) {//do nothing
 
+		}
+		else if (_size > new_size) {//smaller size
+
+		}
+		else if (_size < new_size) {//bigger size
+			
+		}
+	}
+	//
+	void resize(const std::size_t new_size,const _Ty&value) {
+		if (_size == new_size) {//do nothing
+
+		}
+		else if (_size > new_size) {//smaller size,use pop_back
+
+		}
+		else if (_size < new_size) {//bigger size use push_back with value
+
+		}
 	}
 };
 
