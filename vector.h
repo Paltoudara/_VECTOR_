@@ -7,7 +7,7 @@
 #include<utility>
 #include<cassert>
 #include<functional>
-#include"Macros.h"
+#include"Header.h"
 _PANAGIOTIS_BEGIN
 template<typename _Ty>
 class vector {
@@ -273,26 +273,54 @@ public:
 	}
 	//
 	void resize(const std::size_t new_size) {
-		if (_size == new_size) {//do nothing
-
+		static_assert(std::is_default_constructible_v<_Ty>, "the type must"
+			"be default constructible");
+		static_assert(std::is_nothrow_destructible_v<_Ty>, "the type must"
+			"be destructible without throwing");
+		if (_size > new_size) {//smaller size,use pop_back
+			std::size_t iterations{ _size - new_size };
+			for (std::size_t i = 0; i < iterations; i++) {
+				_size--;
+				delete _array[_size];
+				_array[_size] = nullptr;
+			}
 		}
-		else if (_size > new_size) {//smaller size
-
-		}
-		else if (_size < new_size) {//bigger size
-			
+		else if (_size < new_size) {//bigger size,use push_back
+			std::size_t iterations{ new_size - _size };
+			if (new_size > _capacity) {
+				reserve(new_size);
+			}
+			for (std::size_t i = 0; i < iterations; i++) {
+				_array[_size] = new(std::nothrow) _Ty{}; // allocate new object
+				if (_array[_size] == nullptr)return;
+				_size++;
+			}
 		}
 	}
 	//
 	void resize(const std::size_t new_size,const _Ty&value) {
-		if (_size == new_size) {//do nothing
-
+		static_assert(std::is_copy_constructible_v<_Ty>, "the type must"
+			"be copy constructible");
+		static_assert(std::is_nothrow_destructible_v<_Ty>, "the type must"
+			"be destructible without throwing");
+		if (_size > new_size) {//smaller size,use pop_back
+			std::size_t iterations{ _size - new_size };
+			for (std::size_t i = 0; i < iterations; i++) {
+				_size--;
+				delete _array[_size];
+				_array[_size] = nullptr;
+			}
 		}
-		else if (_size > new_size) {//smaller size,use pop_back
-
-		}
-		else if (_size < new_size) {//bigger size use push_back with value
-
+		else if (_size < new_size) {//bigger size,use push_back
+			std::size_t iterations{ new_size - _size };
+			if (new_size > _capacity) {
+				reserve(new_size);
+			}
+			for (std::size_t i = 0; i < iterations; i++) {
+				_array[_size] = new(std::nothrow) _Ty(value); // allocate new object
+				if (_array[_size] == nullptr)return;
+				_size++;
+			}
 		}
 	}
 };
