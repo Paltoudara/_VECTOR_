@@ -17,15 +17,15 @@ private:
 	std::size_t _size;
 	_Ty** _array;
 public:
-	//default constructor done
+	//default func constructor done
 	vector()noexcept :_capacity{}, _size{}, _array{}{}
-	//done
+	//constructor func done
 	vector(const std::size_t capacity) :
 		_size{}, _capacity{ capacity > 0 ? capacity : 1 }
 	{
 		_array = new _Ty * [capacity > 0 ? capacity : 1]{};
 	}
-	//
+	//copy constructor func done
 	vector(const vector<_Ty>& other) :_capacity{}, _size{}, _array{}
 	{
 		static_assert(std::is_copy_constructible_v<_Ty>, "the type"
@@ -34,14 +34,15 @@ public:
 			"must be destructible without throwing");
 		if (other._capacity == 0)return;
 		_Ty** new_array = new _Ty * [other._capacity] {};
+		std::size_t i{};
 		try {
-			for (std::size_t i = 0; i < other._size; i++) {
+			for (; i < other._size; i++) {
 				new_array[i] = new _Ty(*other._array[i]);
 			}
 		}
 		catch (...) {
-			for (std::size_t i = 0; i < other._size; i++) {
-				delete new_array[i];
+			for (std::size_t j = 0; j < i; j++) {
+				delete new_array[j];
 			}
 			delete[]new_array;
 			throw;
@@ -51,7 +52,7 @@ public:
 		_size = other._size;
 		
 	}
-	//
+	//move constructor func done
 	vector(vector<_Ty>&& other)noexcept 
 		:_array{}, _size{}, _capacity{}
 	{
@@ -110,7 +111,7 @@ public:
 		if (_array[_size] == nullptr)return;
 		_size++;
 	}
-	//
+	//emplace back func done
 	template<class ..._Valty>
 	void emplace_back(_Valty&&..._Val) {
 		if (_size == _capacity) {
@@ -306,7 +307,7 @@ public:
 		_array = new_array;
 		_capacity = _size;
 	}
-	//
+	//resize func done
 	void resize(const std::size_t new_size) {
 		static_assert(std::is_default_constructible_v<_Ty>, "the type must"
 			"be default constructible");
@@ -334,7 +335,7 @@ public:
 			}
 		}
 	}
-	//
+	//resize func done
 	void resize(const std::size_t new_size,const _Ty&value) {
 		static_assert(std::is_copy_constructible_v<_Ty>, "the type must"
 			"be copy constructible");
@@ -360,6 +361,85 @@ public:
 			}
 		}
 	}
+	vector<_Ty>& operator =(const vector<_Ty>& other) {
+		static_assert(std::is_nothrow_destructible_v<_Ty>, "the type"
+			"must be destructible without throwing");
+		if (other._capacity == 0) {
+			this->~vector();
+			return *this;
+		}
+		else if (other._capacity!=0&&other._size == 0) {//othe has to give
+			if (_capacity == other._capacity) {
+				std::size_t iterations{ _size };
+				for (std::size_t i = 0; i < iterations; i++) {
+					_size--;
+					delete _array[_size];
+					_array[_size] = nullptr;
+				}
+				
+			}
+			else if (_capacity < other._capacity) {
+				reserve(other._capacity);
+				//if this goes wrong nothing happens
+				std::size_t iterations{ _size };
+				for (std::size_t i = 0; i < iterations; i++) {
+					_size--;
+					delete _array[_size];
+					_array[_size] = nullptr;
+				}
+			}
+			else if (_capacity > other._capacity) {
+				//
+				std::size_t iterations{ _size };
+				for (std::size_t i = 0; i < iterations; i++) {
+					_size--;
+					delete _array[_size];
+					_array[_size] = nullptr;
+				}
+				//idio
+				_Ty** new_array = new _Ty * [other._capacity] {};
+				if (_array != nullptr) {
+					delete[]_array;
+				}
+				_array = new_array;
+				_capacity = other._capacity;
+			}
+		}
+		else if (other._capacity != 0 && other._size != 0) {
+			//maybe throw my elemens and the alloc
+		}
+	}
+	//assign func done
+	void assign(const std::size_t count, const _Ty& value) {
+		static_assert(std::is_copy_constructible_v<_Ty>, "the type must"
+			"be copy assignable");
+		static_assert(std::is_nothrow_destructible_v<_Ty>, "the type"
+			"must be destructible without throwing");
+		if (count == 0) {
+			clear();
+			return;
+		}
+		_Ty** new_array = new _Ty * [count] {};
+		std::size_t i{};
+		try {
+			for (; i < count; i++) {
+				if (i == 15)throw 1;
+				new_array[i] = new _Ty(value);
+			}
+		}
+		catch (...) {
+			for (std::size_t j = 0; j< i; j++) {
+				delete new_array[j];
+			}
+			delete[]new_array;
+			throw;
+		}
+		this->~vector();
+		_array = new_array;
+		_capacity = _size = count;
+		
+	}
+	//move operator func done
 	vector<_Ty>& operator =(vector<_Ty>&& other)&noexcept {
 		this->~vector();
 		std::swap(_array, other._array);
