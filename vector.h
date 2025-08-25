@@ -1,3 +1,4 @@
+#pragma once
 #include<iostream>
 #include<new>
 #include<algorithm>
@@ -7,7 +8,7 @@
 #include<utility>
 #include<cassert>
 #include<functional>
-#include"Header.h"
+#include"Macros.h"
 _PANAGIOTIS_BEGIN
 template<typename _Ty>
 class vector {
@@ -23,6 +24,40 @@ public:
 		_size{}, _capacity{ capacity > 0 ? capacity : 1 }
 	{
 		_array = new _Ty * [capacity > 0 ? capacity : 1]{};
+	}
+	//
+	vector(const vector<_Ty>& other) :_capacity{}, _size{}, _array{}
+	{
+		static_assert(std::is_copy_constructible_v<_Ty>, "the type"
+			"must be copy constructible");
+		static_assert(std::is_nothrow_destructible_v<_Ty>, "the type"
+			"must be destructible without throwing");
+		if (other._capacity == 0)return;
+		_Ty** new_array = new _Ty * [other._capacity] {};
+		try {
+			for (std::size_t i = 0; i < other._size; i++) {
+				new_array[i] = new _Ty(*other._array[i]);
+			}
+		}
+		catch (...) {
+			for (std::size_t i = 0; i < other._size; i++) {
+				delete new_array[i];
+			}
+			delete[]new_array;
+			throw;
+		}
+		_array = new_array;
+		_capacity = other._capacity;
+		_size = other._size;
+		
+	}
+	//
+	vector(vector<_Ty>&& other)noexcept 
+		:_array{}, _size{}, _capacity{}
+	{
+		std::swap(_array, other._array);
+		std::swap(_capacity, other._capacity);
+		std::swap(_size, other._size);
 	}
 	//capacity func done
 	std::size_t capacity()const noexcept {
@@ -286,6 +321,8 @@ public:
 			}
 		}
 		else if (_size < new_size) {//bigger size,use push_back
+			//1)size!=0
+			//1)_capacity<=new_size
 			std::size_t iterations{ new_size - _size };
 			if (new_size > _capacity) {
 				reserve(new_size);
@@ -322,6 +359,13 @@ public:
 				_size++;
 			}
 		}
+	}
+	vector<_Ty>& operator =(vector<_Ty>&& other)&noexcept {
+		this->~vector();
+		std::swap(_array, other._array);
+		std::swap(_size, other._size);
+		std::swap(_capacity, other._capacity);
+		return *this;
 	}
 };
 
