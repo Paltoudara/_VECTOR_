@@ -8,7 +8,7 @@
 #include<utility>
 #include<cassert>
 #include<functional>
-#include"Macros.h"
+#include"Header.h"
 _PANAGIOTIS_BEGIN
 template<typename _Ty>
 class vector {
@@ -45,7 +45,7 @@ public:
 				delete new_array[j];
 			}
 			delete[]new_array;
-			throw;
+			throw 1;
 		}
 		_array = new_array;
 		_capacity = other._capacity;
@@ -322,8 +322,6 @@ public:
 			}
 		}
 		else if (_size < new_size) {//bigger size,use push_back
-			//1)size!=0
-			//1)_capacity<=new_size
 			std::size_t iterations{ new_size - _size };
 			if (new_size > _capacity) {
 				reserve(new_size);
@@ -361,6 +359,7 @@ public:
 			}
 		}
 	}
+	//copy operator func done
 	vector<_Ty>& operator =(const vector<_Ty>& other) {
 		static_assert(std::is_nothrow_destructible_v<_Ty>, "the type"
 			"must be destructible without throwing");
@@ -368,46 +367,26 @@ public:
 			this->~vector();
 			return *this;
 		}
-		else if (other._capacity!=0&&other._size == 0) {//othe has to give
-			if (_capacity == other._capacity) {
-				std::size_t iterations{ _size };
-				for (std::size_t i = 0; i < iterations; i++) {
-					_size--;
-					delete _array[_size];
-					_array[_size] = nullptr;
-				}
-				
-			}
-			else if (_capacity < other._capacity) {
-				reserve(other._capacity);
-				//if this goes wrong nothing happens
-				std::size_t iterations{ _size };
-				for (std::size_t i = 0; i < iterations; i++) {
-					_size--;
-					delete _array[_size];
-					_array[_size] = nullptr;
-				}
-			}
-			else if (_capacity > other._capacity) {
-				//
-				std::size_t iterations{ _size };
-				for (std::size_t i = 0; i < iterations; i++) {
-					_size--;
-					delete _array[_size];
-					_array[_size] = nullptr;
-				}
-				//idio
-				_Ty** new_array = new _Ty * [other._capacity] {};
-				if (_array != nullptr) {
-					delete[]_array;
-				}
-				_array = new_array;
-				_capacity = other._capacity;
+		_Ty** new_array = new _Ty * [other._capacity] {};
+		std::size_t i{};
+		try {
+			for (; i < other._size; i++) {
+				new_array[i] = new _Ty(*other._array[i]);
 			}
 		}
-		else if (other._capacity != 0 && other._size != 0) {
-			//maybe throw my elemens and the alloc
+		catch (...) {
+			for (std::size_t j = 0; j < i; j++) {
+				delete new_array[j];
+			}
+			delete[]new_array;
+			throw 1;
 		}
+		this->~vector();
+		_array = new_array;
+		_capacity = other._capacity;
+		_size = other._size;
+		return *this;
+
 	}
 	//assign func done
 	void assign(const std::size_t count, const _Ty& value) {
@@ -423,7 +402,6 @@ public:
 		std::size_t i{};
 		try {
 			for (; i < count; i++) {
-				if (i == 15)throw 1;
 				new_array[i] = new _Ty(value);
 			}
 		}
@@ -432,7 +410,7 @@ public:
 				delete new_array[j];
 			}
 			delete[]new_array;
-			throw;
+			throw 1;
 		}
 		this->~vector();
 		_array = new_array;
