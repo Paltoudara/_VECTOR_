@@ -1,4 +1,3 @@
-//ANY OPTIMIZATIONS POSSIBLE ARE WELCOMED WHEN YOU THINK ALL THE STRUCTURE CONSIDER ANY IMPROVEMENT POSSIBLE TO MAKE SOS
 #pragma once
 #include<iostream>
 #include<new>
@@ -17,7 +16,53 @@ private:
 	std::size_t _capacity;
 	std::size_t _size;
 	_Ty** _array;
+	//don't use this class when a vector points to deallocated object
+	//only to valid classes in stack and heap
+	class vector_iterator {
+		vector<_Ty>* owner;
+		std::size_t index;
+		friend class vector;
+	public:
+		//
+		vector_iterator()noexcept 
+			:owner{ nullptr }, index{} {}
+		//
+		vector_iterator( vector<_Ty>*other,const std::size_t _index)noexcept:
+			owner{other}, index{_index} {}
+		//
+		vector_iterator(const vector_iterator& other)noexcept = default;
+		//
+		vector_iterator(vector_iterator&& other)noexcept = default;
+		//
+		vector_iterator operator++() {
+			if (owner->_array != nullptr && index + 1 < owner->_size) {
+				index++;
+			}
+			return vector_iterator{ owner,index };
+		}
+		//
+		vector_iterator operator++(int)noexcept {
+			vector_iterator tmp{ owner,index };
+			if (owner->_array != nullptr && index + 1 < owner->_size) {
+				index++;
+			}
+			return tmp;
+		}
+		//
+		bool operator!=(const vector_iterator& other)const noexcept {
+			return index != other.index || owner != other.owner;
+		}
+		//
+		bool operator==(const vector_iterator& other)const noexcept {
+			return index == other.index && owner == other.owner;
+		}
+		//
+		const _Ty& operator *()const& {
+			
+		}
+	};
 public:
+	using iterator = vector_iterator;
 	//default func constructor done
 	vector()noexcept :_capacity{}, _size{}, _array{}{}
 	//constructor func done
@@ -52,6 +97,35 @@ public:
 		_capacity = other._capacity;
 		_size = other._size;
 		
+	}
+	//constructor with initializer_list func done
+	vector(const std::initializer_list<_Ty>&other)
+		:_array{}, _size{}, _capacity{}
+	{
+		static_assert(std::is_copy_constructible_v<_Ty>, "the type must"
+			"be copy constructible in order to use this func");
+		static_assert(std::is_nothrow_destructible_v<_Ty>, "the type"
+			"must be destructible without throwing");
+		if (other.size() == 0)return;
+		_Ty** new_array = new _Ty * [other.size()];
+		const _Ty* ptr{ other.begin() };
+		std::size_t i{};
+		try {
+			for (; i < other.size(); i++) {
+				new_array[i] = new _Ty(*ptr);
+				ptr++;
+			}
+		}
+		catch (...) {
+			for (std::size_t j = 0; j < i; j++) {
+				std::cout << *new_array[j] << '\n';
+				delete new_array[j];
+			}
+			delete[]new_array;
+			throw 1;
+		}
+		_array = new_array;
+		_capacity = _size = other.size();
 	}
 	//move constructor func done
 	vector(vector<_Ty>&& other)noexcept 
@@ -141,7 +215,8 @@ public:
 			delete _array[_size];
 			_array[_size] = nullptr;
 			return;
-		}
+		}//make pop back to shrink capacity when not used 
+		//some number of capacity
 	}
 	//
 	void show() const{
@@ -425,6 +500,15 @@ public:
 		std::swap(_size, other._size);
 		std::swap(_capacity, other._capacity);
 		return *this;
+	}
+	// Returns a pointer to the internal array of pointers.
+	// The vector retains ownership of the objects.
+	// Users may read or modify the objects via the pointers, but must NOT delete them.
+	_Ty** data()noexcept {
+		return _array;
+	}
+	iterator begin(){
+		return { this,0 };
 	}
 };
 
