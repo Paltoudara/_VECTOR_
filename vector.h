@@ -39,15 +39,15 @@ private:
 			_owner = other._owner;
 			return *this;
 		}
-		vector_iterator operator ++(){
-			if (_owner != nullptr &&_index + 1 < _owner->_size) {
+		vector_iterator operator ++()noexcept{
+			if (_owner != nullptr &&_index<_owner->_size) {
 				_index++;
 			}
 			return { _index,_owner };
 		}
-		vector_iterator operator++(int) {
+		vector_iterator operator++(int)noexcept {
 			vector_iterator tmp{ _index,_owner };
-			if (_owner != nullptr && _index + 1 < _owner->_size) {
+			if (_owner != nullptr && _index<_owner->_size) {
 				_index++;
 			}
 			return tmp;
@@ -83,8 +83,8 @@ private:
 			}
 			throw out_of_bounds{ "tried to access an invalid index" };
 		}
-		vector_iterator operator+=(const std::size_t counter) {
-			if (_owner != nullptr && _index + counter < _owner->_size) {
+		vector_iterator operator+=(const std::size_t counter)noexcept {
+			if (_owner != nullptr && _index + counter <=_owner->_size) {
 				_index += counter;
 			}
 			return { _index,_owner };
@@ -113,9 +113,73 @@ private:
 			}
 			throw out_of_bounds{ "tried to access an invalid index" };
 		}
+		vector_iterator operator+(const std::size_t counter)const noexcept {
+			vector_iterator curr{ _index,_owner };
+			if (curr._owner != nullptr && curr._index + counter <=_owner->_size) {
+				curr._index += counter;
+			}
+			return curr;
+		}
+		vector_iterator operator--()noexcept {
+			if (_owner != nullptr && _index > 0 && _index <=_owner->_size) {
+				_index--;
+			}
+			return { _index,_owner };
+		}
+		vector_iterator operator--(int)noexcept {
+			vector_iterator tmp{ _index,_owner };
+			if (_owner != nullptr && _index > 0 && _index <=_owner->_size) {
+				_index--;
+			}
+			return tmp;
+		}
+		vector_iterator operator-(const std::size_t counter)const noexcept {
+			vector_iterator curr{ _index,_owner };
+			if (_owner != nullptr&&counter<=curr._index &&
+				curr._index-counter>0 &&curr._index-counter<=_owner->_size) {
+				curr._index -= counter;
+			}
+			return curr;
+		}
+		vector_iterator operator-=(const std::size_t counter)noexcept {
+			if (_owner != nullptr && counter <=_index &&
+				_index-counter > 0 && _index-counter <=_owner->_size) {
+				_index -= counter;
+			}
+			return { _index,_owner };
+		}
+		_Ty& operator [](const std::size_t index)& {
+			if (_owner != nullptr && _index + index < _owner->_size) {
+				return *_owner->_array[_index + index];
+			}
+			throw out_of_bounds{ "tried to access invalid index" };
+		}
+		_Ty&& operator [](const std::size_t index)&&{
+			if (_owner != nullptr && _index + index < _owner->_size) {
+				return std::move(*_owner->_array[_index + index]);
+			}
+			throw out_of_bounds{ "tried to access invalid index" };
+		}
+		const _Ty& operator [](const std::size_t index)const & {
+			if (_owner != nullptr && _index + index < _owner->_size) {
+				return *_owner->_array[_index + index];
+			}
+			throw out_of_bounds{ "tried to access invalid index" };
+		}
+		const _Ty&& operator [](const std::size_t index)const && {
+			if (_owner != nullptr && _index + index < _owner->_size) {
+				return std::move(*_owner->_array[_index + index]);
+			}
+			throw out_of_bounds{ "tried to access invalid index" };
+		}
+		~vector_iterator()noexcept {
+			_index = 0;
+			_owner = nullptr;
+		}
 	};
 
 public:
+	using iterator = vector_iterator;
 	//default func constructor done
 	vector()noexcept :_capacity{}, _size{}, _array{}{}
 	//constructor func done
@@ -599,6 +663,12 @@ public:
 		}
 		_array[index] = ptr;
 		_size++;
+	}
+	iterator begin()noexcept {
+		return { 0,this };
+	}
+	iterator end()noexcept {
+		return { _size,this };
 	}
 };
 
