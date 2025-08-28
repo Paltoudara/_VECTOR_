@@ -8,6 +8,7 @@
 #include<utility>
 #include<cassert>
 #include<functional>
+#include<memory>
 #include"Header.h"
 _PANAGIOTIS_BEGIN
 template<typename _Ty>
@@ -16,6 +17,104 @@ private:
 	std::size_t _capacity;
 	std::size_t _size;
 	_Ty** _array;
+	class vector_iterator {
+	private:
+		std::size_t _index;
+		vector<_Ty>* _owner;
+		friend class vector;
+		vector_iterator(const std::size_t index,vector<_Ty>* const owner)
+			noexcept :_index{ index }, _owner{ owner }{ }
+	public:
+		vector_iterator()
+			noexcept:_index{},_owner{}{ }
+		vector_iterator(const vector_iterator& other)noexcept = default;
+		vector_iterator(vector_iterator&& other)noexcept = default;
+		vector_iterator operator=(const vector_iterator& other)noexcept {
+			_index = other._index;
+			_owner = other._owner;
+			return *this;
+		}
+		vector_iterator operator=(vector_iterator&& other)noexcept {
+			_index = other._index;
+			_owner = other._owner;
+			return *this;
+		}
+		vector_iterator operator ++(){
+			if (_owner != nullptr &&_index + 1 < _owner->_size) {
+				_index++;
+			}
+			return { _index,_owner };
+		}
+		vector_iterator operator++(int) {
+			vector_iterator tmp{ _index,_owner };
+			if (_owner != nullptr && _index + 1 < _owner->_size) {
+				_index++;
+			}
+			return tmp;
+		}
+		bool operator!=(const vector_iterator& other)const noexcept {
+			return _index != other._index || other._owner != _owner;
+		}
+		//
+		bool operator ==(const vector_iterator& other)const noexcept {
+			return _index==other._index &&other._owner==_owner;
+		}
+		const _Ty& operator *()const& {
+			if (_owner != nullptr && _index < _owner->_size) {
+				return *_owner->_array[_index];
+			}
+			throw out_of_bounds{ "tried to access an invalid index" };
+		}
+		_Ty& operator *()& {
+			if (_owner != nullptr && _index < _owner->_size) {
+				return *_owner->_array[_index];
+			}
+			throw out_of_bounds{ "tried to access an invalid index" };
+		}
+		const _Ty&& operator *()const&& {
+			if (_owner != nullptr && _index < _owner->_size) {
+				return std::move(*_owner->_array[_index]);
+			}
+			throw out_of_bounds{ "tried to access an invalid index" };
+		}
+		_Ty&& operator *()&& {
+			if (_owner != nullptr && _index < _owner->_size) {
+				return std::move(*_owner->_array[_index]);
+			}
+			throw out_of_bounds{ "tried to access an invalid index" };
+		}
+		vector_iterator operator+=(const std::size_t counter) {
+			if (_owner != nullptr && _index + counter < _owner->_size) {
+				_index += counter;
+			}
+			return { _index,_owner };
+		}
+		const _Ty* operator->()const& {
+			if (_owner != nullptr && _index < _owner->_size) {
+				return std::addressof(*_owner->_array[_index]);
+			}
+			throw out_of_bounds{ "tried to access an invalid index" };
+		}
+		_Ty* operator->()& {
+			if (_owner != nullptr && _index < _owner->_size) {
+				return std::addressof(*_owner->_array[_index]);
+			}
+			throw out_of_bounds{ "tried to access an invalid index" };
+		}
+		const _Ty* operator->()const&& {
+			if (_owner != nullptr && _index < _owner->_size) {
+				return std::addressof(*_owner->_array[_index]);
+			}
+			throw out_of_bounds{ "tried to access an invalid index" };
+		}
+		_Ty* operator->()&& {
+			if (_owner != nullptr && _index < _owner->_size) {
+				return std::addressof(*_owner->_array[_index]);
+			}
+			throw out_of_bounds{ "tried to access an invalid index" };
+		}
+	};
+
 public:
 	//default func constructor done
 	vector()noexcept :_capacity{}, _size{}, _array{}{}
