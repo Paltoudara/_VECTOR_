@@ -16,53 +16,7 @@ private:
 	std::size_t _capacity;
 	std::size_t _size;
 	_Ty** _array;
-	//don't use this class when a vector points to deallocated object
-	//only to valid classes in stack and heap
-	class vector_iterator {
-		vector<_Ty>* owner;
-		std::size_t index;
-		friend class vector;
-	public:
-		//
-		vector_iterator()noexcept 
-			:owner{ nullptr }, index{} {}
-		//
-		vector_iterator( vector<_Ty>*other,const std::size_t _index)noexcept:
-			owner{other}, index{_index} {}
-		//
-		vector_iterator(const vector_iterator& other)noexcept = default;
-		//
-		vector_iterator(vector_iterator&& other)noexcept = default;
-		//
-		vector_iterator operator++() {
-			if (owner->_array != nullptr && index + 1 < owner->_size) {
-				index++;
-			}
-			return vector_iterator{ owner,index };
-		}
-		//
-		vector_iterator operator++(int)noexcept {
-			vector_iterator tmp{ owner,index };
-			if (owner->_array != nullptr && index + 1 < owner->_size) {
-				index++;
-			}
-			return tmp;
-		}
-		//
-		bool operator!=(const vector_iterator& other)const noexcept {
-			return index != other.index || owner != other.owner;
-		}
-		//
-		bool operator==(const vector_iterator& other)const noexcept {
-			return index == other.index && owner == other.owner;
-		}
-		//
-		const _Ty& operator *()const& {
-			
-		}
-	};
 public:
-	using iterator = vector_iterator;
 	//default func constructor done
 	vector()noexcept :_capacity{}, _size{}, _array{}{}
 	//constructor func done
@@ -118,7 +72,6 @@ public:
 		}
 		catch (...) {
 			for (std::size_t j = 0; j < i; j++) {
-				std::cout << *new_array[j] << '\n';
 				delete new_array[j];
 			}
 			delete[]new_array;
@@ -162,8 +115,7 @@ public:
 			_array = new_array;
 			_capacity = new_capacity;
 		}
-		_array[_size] = new(std::nothrow) _Ty(data); // allocate new object
-		if (_array[_size] == nullptr)return;
+		_array[_size] = new _Ty(data); // allocate new object
 		_size++;
 	}
 	//push back func done
@@ -182,8 +134,7 @@ public:
 			_array = new_array;
 			_capacity = new_capacity;
 		}
-		_array[_size] = new(std::nothrow) _Ty(std::move(data)); // allocate new object
-		if (_array[_size] == nullptr)return;
+		_array[_size] = new _Ty(std::move(data)); // allocate new object
 		_size++;
 	}
 	//emplace back func done
@@ -202,8 +153,7 @@ public:
 			_array = new_array;
 			_capacity = new_capacity;
 		}
-		_array[_size] = new(std::nothrow) _Ty(std::forward<_Valty>(_Val)...); // allocate new object
-		if (_array[_size] == nullptr)return;
+		_array[_size] = new _Ty(std::forward<_Valty>(_Val)...); // allocate new object
 		_size++;
 	}
 	//pop_back func done
@@ -403,8 +353,7 @@ public:
 				reserve(new_size);
 			}
 			for (std::size_t i = 0; i < iterations; i++) {
-				_array[_size] = new(std::nothrow) _Ty{}; // allocate new object
-				if (_array[_size] == nullptr)return;
+				_array[_size] = new _Ty{}; // allocate new object
 				_size++;
 			}
 		}
@@ -429,8 +378,7 @@ public:
 				reserve(new_size);
 			}
 			for (std::size_t i = 0; i < iterations; i++) {
-				_array[_size] = new(std::nothrow) _Ty(value); // allocate new object
-				if (_array[_size] == nullptr)return;
+				_array[_size] = new _Ty(value); // allocate new object
 				_size++;
 			}
 		}
@@ -507,8 +455,51 @@ public:
 	_Ty** data()noexcept {
 		return _array;
 	}
-	iterator begin(){
-		return { this,0 };
+	void insert(const std::size_t index,const _Ty& value) {
+		static_assert(std::is_copy_constructible_v<_Ty>, "the type"
+			"must be copy constructible");
+		if (index >= _size) {
+			push_back(value);
+			return;
+		}
+		if (_size == _capacity) {//realloc
+			_Ty** new_array= new _Ty * [2*_capacity+1] {};
+			for (std::size_t i = 0; i < _size; i++) {
+				new_array[i] = _array[i];
+			}
+			delete[]_array;
+			_array = new_array;
+			_capacity =_capacity*2+1;
+		}
+		_Ty* ptr{ new _Ty(value) };
+		for (std::size_t i = _size; i > index; i--) {
+			_array[i] = _array[i - 1];
+		}
+		_array[index] = ptr;
+		_size++;
+	}
+	void insert(const std::size_t index,  _Ty&& value) {
+		static_assert(std::is_move_constructible_v<_Ty>, "the type"
+			"must be move constructible");
+		if (index >= _size) {
+			push_back(std::move(value));
+			return;
+		}
+		if (_size == _capacity) {//realloc
+			_Ty** new_array = new _Ty * [2 * _capacity + 1] {};
+			for (std::size_t i = 0; i < _size; i++) {
+				new_array[i] = _array[i];
+			}
+			delete[]_array;
+			_array = new_array;
+			_capacity = _capacity * 2 + 1;
+		}
+		_Ty* ptr{ new _Ty(std::move(value)) };
+		for (std::size_t i = _size; i > index; i--) {
+			_array[i] = _array[i - 1];
+		}
+		_array[index] = ptr;
+		_size++;
 	}
 };
 
