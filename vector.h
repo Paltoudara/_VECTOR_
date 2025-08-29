@@ -213,19 +213,6 @@ private:
 			_owner = nullptr;
 		}
 	};
-	class vector_reverse_iterator final{
-	private:
-		std::size_t _index;
-		vector<_Ty>* _owner;
-		friend class vector;
-		vector_reverse_iterator(const std::size_t index,vector<_Ty>*const owner)
-			noexcept:_index{index},_owner{owner}{ }
-	public:
-		vector_reverse_iterator()noexcept :_index{}, _owner{}{}
-		vector_reverse_iterator(const vector_reverse_iterator& other)noexcept = default;
-		vector_reverse_iterator(vector_reverse_iterator&& other)noexcept = default;
-
-	};
 	template<class _Valty>
 	void insert_element(const std::size_t index, _Valty&& _Val) {
 		if (index >= _size) {
