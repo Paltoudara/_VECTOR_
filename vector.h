@@ -654,6 +654,7 @@ public:
 	_Ty** data()noexcept {
 		return _array;
 	}
+	//implement one insert 
 	void insert(const std::size_t index,const _Ty& value) {
 		static_assert(std::is_copy_constructible_v<_Ty>, "the type"
 			"must be copy constructible");
@@ -671,6 +672,28 @@ public:
 			_capacity =_capacity*2+1;
 		}
 		_Ty* ptr{ new _Ty(value) };
+		for (std::size_t i = _size; i > index; i--) {
+			_array[i] = _array[i - 1];
+		}
+		_array[index] = ptr;
+		_size++;
+	}
+	template<class..._Valty>
+	void emplace(const std::size_t index,_Valty&&..._Val) {
+		if (index >= _size) {
+			emplace_back(std::forward<_Valty>(_Val)...);
+			return;
+		}
+		if (_size == _capacity) {//realloc
+			_Ty** new_array = new _Ty * [2 * _capacity + 1] {};
+			for (std::size_t i = 0; i < _size; i++) {
+				new_array[i] = _array[i];
+			}
+			delete[]_array;
+			_array = new_array;
+			_capacity = _capacity * 2 + 1;
+		}
+		_Ty* ptr{ new _Ty(std::forward<_Valty>(_Val)...) };
 		for (std::size_t i = _size; i > index; i--) {
 			_array[i] = _array[i - 1];
 		}
@@ -699,6 +722,19 @@ public:
 		}
 		_array[index] = ptr;
 		_size++;
+	}
+	//prosoxh stous invalid iteratos se pointers pou den yparxoun pleon
+	void erase(const std::size_t index)noexcept {
+		static_assert(std::is_nothrow_destructible_v<_Ty>, "the type"
+			"must be destructible without throwing");
+		if (index >= _size)return;
+		delete _array[index];
+		//apo ekei kai pera shift
+		for (std::size_t i = index; i < _size-1; i++) {
+			_array[i] = _array[i + 1];
+		}
+		_array[_size - 1] = nullptr;
+		_size--;
 	}
 	iterator begin()noexcept {
 		return { 0,this };
