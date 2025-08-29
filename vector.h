@@ -9,20 +9,21 @@
 #include<cassert>
 #include<functional>
 #include<memory>
-#include"Header.h"
+#include"Macros.h"
 _PANAGIOTIS_BEGIN
 template<typename _Ty>
-class vector {
+class vector final{
 private:
 	std::size_t _capacity;
 	std::size_t _size;
 	_Ty** _array;
-	//use templates to make vector_iterator aslo const at same time
+	//make iterator point to a valid vector on stack declared or in heap
+	//don't use and iterator when it is invalid
 	template<bool value>
-	class vector_iterator {
+	class vector_iterator final{
 	private:
 		std::size_t _index;
-		vector<_Ty>* _owner;
+		vector<_Ty> * _owner;
 		friend class vector;
 		vector_iterator(const std::size_t index,vector<_Ty>* const owner)
 			noexcept :_index{ index }, _owner{ owner }{ }
@@ -212,7 +213,19 @@ private:
 			_owner = nullptr;
 		}
 	};
+	class vector_reverse_iterator final{
+	private:
+		std::size_t _index;
+		vector<_Ty>* _owner;
+		friend class vector;
+		vector_reverse_iterator(const std::size_t index,vector<_Ty>*const owner)
+			noexcept:_index{index},_owner{owner}{ }
+	public:
+		vector_reverse_iterator()noexcept :_index{}, _owner{}{}
+		vector_reverse_iterator(const vector_reverse_iterator& other)noexcept = default;
+		vector_reverse_iterator(vector_reverse_iterator&& other)noexcept = default;
 
+	};
 public:
 	using iterator = vector_iterator<true>;
 	using const_iterator = vector_iterator<false>;
@@ -678,28 +691,6 @@ public:
 		_array[index] = ptr;
 		_size++;
 	}
-	template<class..._Valty>
-	void emplace(const std::size_t index,_Valty&&..._Val) {
-		if (index >= _size) {
-			emplace_back(std::forward<_Valty>(_Val)...);
-			return;
-		}
-		if (_size == _capacity) {//realloc
-			_Ty** new_array = new _Ty * [2 * _capacity + 1] {};
-			for (std::size_t i = 0; i < _size; i++) {
-				new_array[i] = _array[i];
-			}
-			delete[]_array;
-			_array = new_array;
-			_capacity = _capacity * 2 + 1;
-		}
-		_Ty* ptr{ new _Ty(std::forward<_Valty>(_Val)...) };
-		for (std::size_t i = _size; i > index; i--) {
-			_array[i] = _array[i - 1];
-		}
-		_array[index] = ptr;
-		_size++;
-	}
 	void insert(const std::size_t index,  _Ty&& value) {
 		static_assert(std::is_move_constructible_v<_Ty>, "the type"
 			"must be move constructible");
@@ -717,6 +708,28 @@ public:
 			_capacity = _capacity * 2 + 1;
 		}
 		_Ty* ptr{ new _Ty(std::move(value)) };
+		for (std::size_t i = _size; i > index; i--) {
+			_array[i] = _array[i - 1];
+		}
+		_array[index] = ptr;
+		_size++;
+	}
+	template<class..._Valty>
+	void emplace(const std::size_t index, _Valty&&..._Val) {
+		if (index >= _size) {
+			emplace_back(std::forward<_Valty>(_Val)...);
+			return;
+		}
+		if (_size == _capacity) {//realloc
+			_Ty** new_array = new _Ty * [2 * _capacity + 1] {};
+			for (std::size_t i = 0; i < _size; i++) {
+				new_array[i] = _array[i];
+			}
+			delete[]_array;
+			_array = new_array;
+			_capacity = _capacity * 2 + 1;
+		}
+		_Ty* ptr{ new _Ty(std::forward<_Valty>(_Val)...) };
 		for (std::size_t i = _size; i > index; i--) {
 			_array[i] = _array[i - 1];
 		}
