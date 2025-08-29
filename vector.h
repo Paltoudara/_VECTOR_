@@ -226,6 +226,46 @@ private:
 		vector_reverse_iterator(vector_reverse_iterator&& other)noexcept = default;
 
 	};
+	template<class _Valty>
+	void insert_element(const std::size_t index, _Valty&& _Val) {
+		if (index >= _size) {
+			push_back(std::forward<_Valty>(_Val));
+			return;
+		}
+		if (_size == _capacity) {//realloc
+			_Ty** new_array = new _Ty * [2 * _capacity + 1] {};
+			for (std::size_t i = 0; i < _size; i++) {
+				new_array[i] = _array[i];
+			}
+			delete[]_array;
+			_array = new_array;
+			_capacity = _capacity * 2 + 1;
+		}
+		_Ty* ptr{ new _Ty(std::forward<_Valty>(_Val)) };
+		for (std::size_t i = _size; i > index; i--) {
+			_array[i] = _array[i - 1];
+		}
+		_array[index] = ptr;
+		_size++;
+	}
+	template<class _Valty>
+	void push_back_element(_Valty&&_Val) {
+		if (_size == _capacity) {
+			std::size_t new_capacity = _capacity * 2 + 1;
+			_Ty** new_array = new _Ty * [new_capacity] {}; // zero-initialize
+
+			for (std::size_t i = 0; i < _size; ++i) {
+				new_array[i] = _array[i]; // move pointers
+			}
+			if (_array != nullptr) {
+				delete[] _array; // delete old pointer array (not the objects)
+			}
+			_array = new_array;
+			_capacity = new_capacity;
+		}
+		_array[_size] = new _Ty(std::forward<_Valty>(_Val)); // allocate new object
+		_size++;
+	}
 public:
 	using iterator = vector_iterator<true>;
 	using const_iterator = vector_iterator<false>;
@@ -314,40 +354,12 @@ public:
 	//push_back func done
 	void push_back(const _Ty& data) {
 		static_assert(std::is_copy_constructible_v<_Ty>, "the type must be copy constructible");
-		if (_size == _capacity) {
-			std::size_t new_capacity = _capacity * 2 + 1;
-			_Ty** new_array = new _Ty * [new_capacity] {}; // zero-initialize
-
-			for (std::size_t i = 0; i < _size; ++i) {
-				new_array[i] = _array[i]; // move pointers
-			}
-			if (_array != nullptr) {
-				delete[] _array; // delete old pointer array (not the objects)
-			}
-			_array = new_array;
-			_capacity = new_capacity;
-		}
-		_array[_size] = new _Ty(data); // allocate new object
-		_size++;
+		push_back_element(data);
 	}
 	//push back func done
 	void push_back(_Ty&& data) {
 		static_assert(std::is_move_constructible_v<_Ty>, "the type must be move constructible");
-		if (_size == _capacity) {
-			std::size_t new_capacity = _capacity * 2 + 1;
-			_Ty** new_array = new _Ty * [new_capacity] {}; // zero-initialize
-
-			for (std::size_t i = 0; i < _size; ++i) {
-				new_array[i] = _array[i]; // move pointers
-			}
-			if (_array != nullptr) {
-				delete[] _array; // delete old pointer array (not the objects)
-			}
-			_array = new_array;
-			_capacity = new_capacity;
-		}
-		_array[_size] = new _Ty(std::move(data)); // allocate new object
-		_size++;
+		push_back_element(std::move(data));
 	}
 	//emplace back func done
 	template<class ..._Valty>
@@ -671,48 +683,12 @@ public:
 	void insert(const std::size_t index,const _Ty& value) {
 		static_assert(std::is_copy_constructible_v<_Ty>, "the type"
 			"must be copy constructible");
-		if (index >= _size) {
-			push_back(value);
-			return;
-		}
-		if (_size == _capacity) {//realloc
-			_Ty** new_array= new _Ty * [2*_capacity+1] {};
-			for (std::size_t i = 0; i < _size; i++) {
-				new_array[i] = _array[i];
-			}
-			delete[]_array;
-			_array = new_array;
-			_capacity =_capacity*2+1;
-		}
-		_Ty* ptr{ new _Ty(value) };
-		for (std::size_t i = _size; i > index; i--) {
-			_array[i] = _array[i - 1];
-		}
-		_array[index] = ptr;
-		_size++;
+		insert_element(index, value);
 	}
 	void insert(const std::size_t index,  _Ty&& value) {
 		static_assert(std::is_move_constructible_v<_Ty>, "the type"
 			"must be move constructible");
-		if (index >= _size) {
-			push_back(std::move(value));
-			return;
-		}
-		if (_size == _capacity) {//realloc
-			_Ty** new_array = new _Ty * [2 * _capacity + 1] {};
-			for (std::size_t i = 0; i < _size; i++) {
-				new_array[i] = _array[i];
-			}
-			delete[]_array;
-			_array = new_array;
-			_capacity = _capacity * 2 + 1;
-		}
-		_Ty* ptr{ new _Ty(std::move(value)) };
-		for (std::size_t i = _size; i > index; i--) {
-			_array[i] = _array[i - 1];
-		}
-		_array[index] = ptr;
-		_size++;
+		insert_element(index, std::move(value));
 	}
 	template<class..._Valty>
 	void emplace(const std::size_t index, _Valty&&..._Val) {
