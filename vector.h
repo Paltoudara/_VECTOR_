@@ -22,6 +22,8 @@ private:
 	_Ty** _array;
 	//make iterator point to a valid vector on stack declared or in heap
 	//don't use and iterator when it is invalid
+	//THIS iterator is pretty much a wrapper around a pointer and an index 
+	//all the constructors do the same thing they just initialize the _index,_owner
 	template<bool value>
 	class vector_iterator final{
 	private:
