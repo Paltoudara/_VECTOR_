@@ -110,9 +110,7 @@ const_iterator cbegin()noexcept;
 
 const_iterator cend()noexcept;
 };
-//-----------------------
-//		INTERFACE END
-//-----------------------
+
 
 
 
