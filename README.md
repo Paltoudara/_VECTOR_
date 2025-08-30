@@ -113,5 +113,6 @@ public:
 
 
 ```
-pateras
+1) default constructor just initiallizes the vector pretty much the default state of the vector: no elements no capacity no size
 
+2) 
