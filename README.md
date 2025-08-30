@@ -10,7 +10,7 @@ public:
 	using iterator = vector_iterator<true>;
 	using const_iterator = vector_iterator<false>;
 
-	vector()noexcept;
+vector()noexcept;
 
 	vector(const std::size_t capacity);
 
