@@ -221,6 +221,11 @@ private:
 	template<class _Valty>
 	void push_back_element(_Valty&& _Val);
 public:
+	static_assert(std::is_object_v<_Ty>, "The C++ Standard forbids container adaptors of non-object types "
+		"because of [container.requirements].");
+	static_assert(!std::is_reference_v<_Ty>, "no references allowed");
+	static_assert(!std::is_const_v<_Ty>, "no const types are allowed");
+	static_assert(!std::is_volatile_v<_Ty>, "no volatile types are allowed");
 	using iterator = vector_iterator<true>;
 	using const_iterator = vector_iterator<false>;
 	//default func constructor done
