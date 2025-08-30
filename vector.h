@@ -15,7 +15,7 @@ _PANAGIOTIS_BEGIN
 //		INTERFACE BEGIN
 //-----------------------
 template<typename _Ty>
-class vector final{
+class vector final {
 private:
 	//private members an array of pointers
 	//a size and a capacity
@@ -29,19 +29,26 @@ private:
 	//THIS iterator is pretty much a wrapper around a pointer and an index 
 	//all the constructors do the same thing they just initialize the _index,_owner
 	//and also all the copy and move operators and destructors
+	//note that this iterator is a template value=true for iterator
+	//and value=false for const_iterator in order to have what functions
+	//we need for every type of iterator
+	//also note that the const_iterator is only for reading elements 
+	//not change them
 	template<bool value>
-	class vector_iterator final{
+	class vector_iterator final {
 	private:
 		std::size_t _index;
-		vector<_Ty> * _owner;
+		vector<_Ty>* _owner;
 		friend class vector;
 		//this cosntructor is private because it i only used with the begin,cbegin,cend,end functions
-		vector_iterator(const std::size_t index,vector<_Ty>* const owner)
-			noexcept :_index{ index }, _owner{ owner }{ }
+		vector_iterator(const std::size_t index, vector<_Ty>* const owner)
+			noexcept :_index{ index }, _owner{ owner } {
+		}
 	public:
 		//default state of the iterator
 		vector_iterator()
-			noexcept:_index{},_owner{}{ }
+			noexcept :_index{}, _owner{} {
+		}
 		//copy constructor default behavior
 		vector_iterator(const vector_iterator& other)noexcept = default;
 		//move constructor default behavior
@@ -59,8 +66,8 @@ private:
 			return *this;
 		}
 		//operator ++ we only increment the iterator if it is in the range [0,size-1]
-		vector_iterator operator ++()noexcept{
-			if (_owner != nullptr &&_index<_owner->_size) {
+		vector_iterator operator ++()noexcept {
+			if (_owner != nullptr && _index < _owner->_size) {
 				_index++;
 			}
 			return { _index,_owner };
@@ -68,7 +75,7 @@ private:
 		//operator ++ we only increment the iterator if it is in the range [0,size-1]
 		vector_iterator operator++(int)noexcept {
 			vector_iterator tmp{ _index,_owner };
-			if (_owner != nullptr && _index<_owner->_size) {
+			if (_owner != nullptr && _index < _owner->_size) {
 				_index++;
 			}
 			return tmp;
@@ -79,31 +86,35 @@ private:
 		}
 		//
 		bool operator ==(const vector_iterator& other)const noexcept {
-			return _index==other._index &&other._owner==_owner;
+			return _index == other._index && other._owner == _owner;
 		}
-		//
+		//this operator is used only if the index is in the range[0,size-1]
+		//its like the at function of the vector if index<_size we good
 		const _Ty& operator *()const& {
 			if (_owner != nullptr && _index < _owner->_size) {
 				return *_owner->_array[_index];
 			}
 			throw out_of_bounds{ "tried to access an invalid index" };
 		}
-		//
-		template<typename=std::enable_if_t<value>>
+		//this operator is used only if the index is in the range[0,size-1]
+		//its like the at function of the vector if index<_size we good
+		template<typename = std::enable_if_t<value>>
 		_Ty& operator *()& {
 			if (_owner != nullptr && _index < _owner->_size) {
 				return *_owner->_array[_index];
 			}
 			throw out_of_bounds{ "tried to access an invalid index" };
 		}
-		//
+		//this operator is used only if the index is in the range[0,size-1]
+		//its like the at function of the vector if index<_size we good
 		const _Ty&& operator *()const&& {
 			if (_owner != nullptr && _index < _owner->_size) {
 				return std::move(*_owner->_array[_index]);
 			}
 			throw out_of_bounds{ "tried to access an invalid index" };
 		}
-		//
+		//this operator is used only if the index is in the range[0,size-1]
+		//its like the at function of the vector if index<_size we good
 		template<typename = std::enable_if_t<value>>
 		_Ty&& operator *()&& {
 			if (_owner != nullptr && _index < _owner->_size) {
@@ -111,21 +122,24 @@ private:
 			}
 			throw out_of_bounds{ "tried to access an invalid index" };
 		}
-		//
+		//operator+=increments the iterator by a counter if index+counter
+		//is in the range [0,size]
 		vector_iterator operator+=(const std::size_t counter)noexcept {
-			if (_owner != nullptr && _index + counter <=_owner->_size) {
+			if (_owner != nullptr && _index + counter <= _owner->_size) {
 				_index += counter;
 			}
 			return { _index,_owner };
 		}
-		//
+		//use it only to access the method of the object that the iterator
+		//points to the container only in the range [0,size-1]
 		const _Ty* operator->()const& {
 			if (_owner != nullptr && _index < _owner->_size) {
 				return std::addressof(*_owner->_array[_index]);
 			}
 			throw out_of_bounds{ "tried to access an invalid index" };
 		}
-		//
+		//use it only to access the method of the object that the iterator
+		//points to the container only in the range [0,size-1]
 		template<typename = std::enable_if_t<value>>
 		_Ty* operator->()& {
 			if (_owner != nullptr && _index < _owner->_size) {
@@ -133,14 +147,16 @@ private:
 			}
 			throw out_of_bounds{ "tried to access an invalid index" };
 		}
-		//
+		//use it only to access the method of the object that the iterator
+		//points to the container only in the range [0,size-1]
 		const _Ty* operator->()const&& {
 			if (_owner != nullptr && _index < _owner->_size) {
 				return std::addressof(*_owner->_array[_index]);
 			}
 			throw out_of_bounds{ "tried to access an invalid index" };
 		}
-		//
+		//use it only to access the method of the object that the iterator
+		//points to the container only in the range [0,size-1]
 		template<typename = std::enable_if_t<value>>
 		_Ty* operator->()&& {
 			if (_owner != nullptr && _index < _owner->_size) {
@@ -148,17 +164,19 @@ private:
 			}
 			throw out_of_bounds{ "tried to access an invalid index" };
 		}
-		//
+		//use it only to access the method of the object that the iterator
+		//points to the container only in the range [0,size-1]
 		vector_iterator operator+(const std::size_t counter)const noexcept {
 			vector_iterator curr{ _index,_owner };
-			if (curr._owner != nullptr && curr._index + counter <=_owner->_size) {
+			if (curr._owner != nullptr && curr._index + counter <= _owner->_size) {
 				curr._index += counter;
 			}
 			return curr;
 		}
-		//
+		//operator -- decrements the iterator making it go backwards
+		//only if the iterator is in the range(0,size]
 		vector_iterator operator--()noexcept {
-			if (_owner != nullptr && _index > 0 && _index <=_owner->_size) {
+			if (_owner != nullptr && _index > 0 && _index <= _owner->_size) {
 				_index--;
 			}
 			return { _index,_owner };
@@ -166,29 +184,35 @@ private:
 		//
 		vector_iterator operator--(int)noexcept {
 			vector_iterator tmp{ _index,_owner };
-			if (_owner != nullptr && _index > 0 && _index <=_owner->_size) {
+			if (_owner != nullptr && _index > 0 && _index <= _owner->_size) {
 				_index--;
 			}
 			return tmp;
 		}
-		//
+		//operator - decrements the iterator making it go backwards by
+		//a counter only if the counter will make the iterator stay 
+		//in the range[0,size] but this is done to a temporary iterator
 		vector_iterator operator-(const std::size_t counter)const noexcept {
 			vector_iterator curr{ _index,_owner };
-			if (curr._owner != nullptr&&counter<=curr._index &&
-				curr._index-counter<=_owner->_size) {
+			if (curr._owner != nullptr && counter <= curr._index &&
+				curr._index - counter <= _owner->_size) {
 				curr._index -= counter;
 			}
 			return curr;
 		}
-		//
+		//operator - decrements the iterator making it go backwards by
+		//a counter only if the counter will make the iterator stay 
+		//in the range[0,size]
 		vector_iterator operator-=(const std::size_t counter)noexcept {
-			if (_owner != nullptr && counter <=_index &&
-				_index-counter <=_owner->_size) {
+			if (_owner != nullptr && counter <= _index &&
+				_index - counter <= _owner->_size) {
 				_index -= counter;
 			}
 			return { _index,_owner };
 		}
-		//
+		//operator [] is like the operator [] from the vector
+		//but it direferences the iterator with the index from 
+		//where it is already at
 		template<typename = std::enable_if_t<value>>
 		_Ty& operator [](const std::size_t index)& {
 			if (_owner != nullptr && _index + index < _owner->_size) {
@@ -198,27 +222,27 @@ private:
 		}
 		//
 		template<typename = std::enable_if_t<value>>
-		_Ty&& operator [](const std::size_t index)&&{
+		_Ty&& operator [](const std::size_t index)&& {
 			if (_owner != nullptr && _index + index < _owner->_size) {
 				return std::move(*_owner->_array[_index + index]);
 			}
 			throw out_of_bounds{ "tried to access invalid index" };
 		}
 		//
-		const _Ty& operator [](const std::size_t index)const & {
+		const _Ty& operator [](const std::size_t index)const& {
 			if (_owner != nullptr && _index + index < _owner->_size) {
 				return *_owner->_array[_index + index];
 			}
 			throw out_of_bounds{ "tried to access invalid index" };
 		}
 		//
-		const _Ty&& operator [](const std::size_t index)const && {
+		const _Ty&& operator [](const std::size_t index)const&& {
 			if (_owner != nullptr && _index + index < _owner->_size) {
 				return std::move(*_owner->_array[_index + index]);
 			}
 			throw out_of_bounds{ "tried to access invalid index" };
 		}
-		//
+		//resets the iterator to the default state 
 		~vector_iterator()noexcept {
 			_index = 0;
 			_owner = nullptr;
@@ -331,7 +355,7 @@ public:
 	iterator end()noexcept;
 	const_iterator cbegin()noexcept;
 	const_iterator cend()noexcept;
-	
+
 };
 //-----------------------
 //		INTERFACE END
@@ -387,15 +411,18 @@ void vector<_Ty>::push_back_element(_Valty&& _Val) {
 	_size++;
 }
 //defaul constructor func done
+//initializes the members to the default state
 template<typename _Ty>
 vector<_Ty>::vector()
-noexcept :_capacity{}, _size{}, _array{} {}
+noexcept :_capacity{}, _size{}, _array{} {
+}
 //constructor func done
+//zero capacity  is not allowed in this constructor
 template<typename _Ty>
 vector<_Ty>::vector(const std::size_t capacity) :
 	_size{}, _capacity{ capacity > 0 ? capacity : 1 }
 {
-	_array = new _Ty * [capacity > 0?capacity:1]{};
+	_array = new _Ty * [capacity > 0 ? capacity : 1]{};
 }
 //copy constructor func done
 template<typename _Ty>
@@ -408,23 +435,32 @@ vector<_Ty>::vector(const vector<_Ty>& other) :_capacity{}, _size{}, _array{}
 	if (other._capacity == 0)return;
 	_Ty** new_array = new _Ty * [other._capacity] {};
 	std::size_t i{};
+	//makes a deep copy of the other vector passed 
+	//if everything is good if it is not an exception is thrown
+	//and we delete everything that we tried creating
 	try {
 		for (; i < other._size; i++) {
+			//make a deep copy of the contents
 			new_array[i] = new _Ty(*other._array[i]);
 		}
 	}
 	catch (...) {
+		//delete everything that you crafted is something goes wrong
+		//and rethrow 
 		for (std::size_t j = 0; j < i; j++) {
 			delete new_array[j];
 		}
 		delete[]new_array;
 		throw 1;
 	}
+	//if everything is good we make our vector take this new_array
 	_array = new_array;
 	_capacity = other._capacity;
 	_size = other._size;
 }
 //constructor with initializer list done
+//pretty much same case as copy constructor
+//but with initializer list for other not a vector
 template<typename _Ty>
 vector<_Ty>::vector(const std::initializer_list<_Ty>& other)
 	:_array{}, _size{}, _capacity{}
@@ -454,8 +490,10 @@ vector<_Ty>::vector(const std::initializer_list<_Ty>& other)
 	_capacity = _size = other.size();
 }
 //move constructor func done
+//still the values from the other vector
+//if we move to ourselves again we take the default state
 template<typename _Ty>
-vector<_Ty>::vector(vector<_Ty>&&other)noexcept
+vector<_Ty>::vector(vector<_Ty>&& other)noexcept
 	:_array{}, _size{}, _capacity{}
 {
 	std::swap(_array, other._array);
@@ -463,33 +501,43 @@ vector<_Ty>::vector(vector<_Ty>&&other)noexcept
 	std::swap(_size, other._size);
 }
 //capacity func done
+//gives the capacity of the vector
 template<typename _Ty>
 std::size_t vector<_Ty>::capacity()const noexcept {
 	return _capacity;
 }
 //empty func done
+//gives if the vector currently has any elements
+//or not
 template<typename _Ty>
 bool vector<_Ty>::empty()const noexcept {
 	return _size == 0;
 }
 //size func done
+//gives the size of the vector 
 template<typename _Ty>
 std::size_t vector<_Ty>::size()const noexcept {
 	return _size;
 }
 //push_back func done
+//the _Ty type must be copy constructible because we are going to make
+//a copy
 template<typename _Ty>
 void vector<_Ty>::push_back(const _Ty& data) {
 	static_assert(std::is_copy_constructible_v<_Ty>, "the type must be copy constructible");
 	push_back_element(data);
 }
 //push_back func done
+//the _Ty type must be move constructible because we are going to make
+//a move
 template<typename _Ty>
 void vector<_Ty>::push_back(_Ty&& data) {
 	static_assert(std::is_move_constructible_v<_Ty>, "the type must be move constructible");
 	push_back_element(std::move(data));
 }
 //emplace_back func done
+//same case as push back but this time we construct the element
+//in place 
 template<typename _Ty>
 template<class ..._Valty>
 void vector<_Ty>::emplace_back(_Valty&&..._Val) {
@@ -510,6 +558,8 @@ void vector<_Ty>::emplace_back(_Valty&&..._Val) {
 	_size++;
 }
 //pop_back func done
+//we pop one element from the top of the vector like a static stack
+//because its an array of pointers the pointers not used are all nullptr
 template<typename _Ty>
 void vector<_Ty>::pop_back()noexcept {
 	static_assert(std::is_nothrow_destructible_v<_Ty>, "the"
@@ -523,6 +573,8 @@ void vector<_Ty>::pop_back()noexcept {
 	//if you wanna shrink capacity use shrink to fit 
 }
 //show func done
+//just prints the contents of the array
+//use this func only if the _Ty type is printable with cout
 template<typename _Ty>
 void vector<_Ty>::show()const {
 	for (std::size_t i = 0; i < _size; i++) {
@@ -530,19 +582,25 @@ void vector<_Ty>::show()const {
 	}
 }
 //operator []func done 
+//gives the element from that index of the vector
+//but with no checks in release
 template<typename _Ty>
 const _Ty& vector<_Ty>::operator [](const std::size_t index) const&
 {
 	assert(index < _size);
 	return *_array[index];
 }
-//operator []func done
+//operator []func done 
+//gives the element from that index of the vector
+//but with no checks in release
 template<typename _Ty>
 _Ty& vector<_Ty>::operator [](const std::size_t index)& {
 	assert(index < _size);
 	return *_array[index];
 }
 //operator []func done 
+//gives the element from that index of the vector
+//but with no checks in release
 template<typename _Ty>
 _Ty&& vector<_Ty>::operator [](const std::size_t index)&&
 {
@@ -550,12 +608,16 @@ _Ty&& vector<_Ty>::operator [](const std::size_t index)&&
 	return std::move(*_array[index]);
 }
 //operator []func done 
+//gives the element from that index of the vector
+//but with no checks in release
 template<typename _Ty>
 const _Ty&& vector<_Ty>::operator [](const std::size_t index)const&& {
 	assert(index < _size);
 	return std::move(*_array[index]);
 }
-//at func done 
+//at func done
+//same thing as operator [] but this time we check for valid index
+//invalid indexes raise exceptions
 template<typename _Ty>
 const _Ty& vector<_Ty>::at(const std::size_t index) const&
 {
@@ -564,7 +626,9 @@ const _Ty& vector<_Ty>::at(const std::size_t index) const&
 	}
 	throw out_of_bounds{ "tried to access invalid pos" };
 }
-//at func done 
+//at func done
+//same thing as operator [] but this time we check for valid index
+//invalid indexes raise exceptions
 template<typename _Ty>
 _Ty& vector<_Ty>::at(const std::size_t index)& {
 	if (index < _size) {
@@ -572,7 +636,9 @@ _Ty& vector<_Ty>::at(const std::size_t index)& {
 	}
 	throw out_of_bounds{ "tried to access invalid pos" };
 }
-//at func done 
+//at func done
+//same thing as operator [] but this time we check for valid index
+//invalid indexes raise exceptions 
 template<typename _Ty>
 _Ty&& vector<_Ty>::at(const std::size_t index)&&
 {
@@ -581,7 +647,9 @@ _Ty&& vector<_Ty>::at(const std::size_t index)&&
 	}
 	throw out_of_bounds{ "tried to access invalid pos" };
 }
-//at func done 
+//at func done
+//same thing as operator [] but this time we check for valid index
+//invalid indexes raise exceptions
 template<typename _Ty>
 const _Ty&& vector<_Ty>::at(const std::size_t index)const&& {
 	if (index < _size) {
@@ -590,6 +658,8 @@ const _Ty&& vector<_Ty>::at(const std::size_t index)const&& {
 	throw out_of_bounds{ "tried to access invalid pos" };
 }
 //destructor func done
+//deletes the array first the objects pointed by the pointers and then
+//the array of pointers
 template<typename _Ty>
 vector<_Ty>::~vector()noexcept {
 	static_assert(std::is_nothrow_destructible_v<_Ty>,
@@ -604,6 +674,8 @@ vector<_Ty>::~vector()noexcept {
 	_capacity = _size = 0;
 }
 //clear func done
+//deletes all the elements that the pointers point and we have zero
+//size no capacity is modified
 template<typename _Ty>
 void vector<_Ty>::clear()noexcept {
 	static_assert(std::is_nothrow_destructible_v<_Ty>,
@@ -615,19 +687,25 @@ void vector<_Ty>::clear()noexcept {
 	_size = 0;
 }
 //front func done
+//the first element of the array
+//with no checks on release 
 template<typename _Ty>
 const _Ty& vector<_Ty>::front() const&
 {
 	assert(!empty());
 	return *_array[0];
 }
-//front func done 
+//front func done
+//the first element of the array
+//with no checks on release 
 template<typename _Ty>
 _Ty& vector<_Ty>::front()& {
 	assert(!empty());
 	return *_array[0];
 }
 //front func done
+//the first element of the array
+//with no checks on release 
 template<typename _Ty>
 _Ty&& vector<_Ty>::front()&&
 {
@@ -635,25 +713,33 @@ _Ty&& vector<_Ty>::front()&&
 	return std::move(*_array[0]);
 }
 //front func done
+//the first element of the array
+//with no checks on release 
 template<typename _Ty>
 const _Ty&& vector<_Ty>::front()const&& {
 	assert(!empty());
 	return std::move(*_array[0]);
 }
 //back func done
+//the last element of the array
+//with no checks on release
 template<typename _Ty>
 const _Ty& vector<_Ty>::back() const&
 {
 	assert(!empty());
 	return *_array[_size - 1];
 }
-//back func done 
+//back func done
+//the last element of the array
+//with no checks on release
 template<typename _Ty>
 _Ty& vector<_Ty>::back()& {
 	assert(!empty());
 	return *_array[_size - 1];
 }
 //back func done
+//the last element of the array
+//with no checks on release
 template<typename _Ty>
 _Ty&& vector<_Ty>::back()&&
 {
@@ -661,12 +747,15 @@ _Ty&& vector<_Ty>::back()&&
 	return std::move(*_array[_size - 1]);
 }
 //back func done
+//the last element of the array
+//with no checks on release
 template<typename _Ty>
 const _Ty&& vector<_Ty>::back()const&& {
 	assert(!empty());
 	return std::move(*_array[_size - 1]);
 }
 //swap func done
+//swaps contnets of two vectors we check to not swap into ourselves
 template<typename _Ty>
 void vector<_Ty>::swap(vector<_Ty>& other)noexcept {
 	if (this != &other) {
@@ -676,8 +765,14 @@ void vector<_Ty>::swap(vector<_Ty>& other)noexcept {
 	}
 }
 //reserve func done
+//reservers capacity for the vector pretty much increases the number
+//of elements that a vector can hold
 template<typename _Ty>
 void vector<_Ty>::reserve(const std::size_t new_capacity) {
+	//if the new_capacity is less than _capacity this func has not result
+	//we create the new vector and just copy pointers those reallocations
+	//are guaranteed to be fast because we only copy pointers so is the same
+	//cost always
 	if (new_capacity > _capacity) {
 		_Ty** new_array = new _Ty * [new_capacity] {};
 		for (std::size_t i = 0; i < _size; i++) {
@@ -692,6 +787,8 @@ void vector<_Ty>::reserve(const std::size_t new_capacity) {
 	return;
 }
 //shrink_to_fit func done
+//just makes capacity equal to size simple if the capacity equals to
+//size nothing happens
 template<typename _Ty>
 void vector<_Ty>::shrink_to_fit() {
 	if (_size == _capacity) return;
@@ -709,7 +806,16 @@ void vector<_Ty>::shrink_to_fit() {
 	_array = new_array;
 	_capacity = _size;
 }
-//
+//resize func done
+//if the size=new_size this func does nothing
+//if the size>new_size just pop elements
+//if the size<new_size we reallocate if the new_size>capacity 
+//and then we push the elements
+//or we just push if new_size<=capacity
+//this func might modifie the state of the vector
+//because we might be able to reserve but not push any of the elements
+//or push some of them this changes of the vector
+//in the end you might have some extra elements pushed into the vector
 template<typename _Ty>
 void vector<_Ty>::resize(const std::size_t new_size) {
 	static_assert(std::is_default_constructible_v<_Ty>, "the type must"
@@ -736,6 +842,9 @@ void vector<_Ty>::resize(const std::size_t new_size) {
 	}
 }
 //resize func done
+//because we might be able to reserve but not push any of the elements
+//or push some of them this changes of the vector
+//in the end you might have some extra elements pushed into the vector
 template<typename _Ty>
 void vector<_Ty>::resize(const std::size_t new_size, const _Ty& value) {
 	static_assert(std::is_copy_constructible_v<_Ty>, "the type must"
@@ -823,7 +932,7 @@ void vector<_Ty>::assign(const std::size_t count, const _Ty& value) {
 }
 //move operator func done
 template<typename _Ty>
-vector<_Ty>& vector<_Ty>::operator =(vector<_Ty>&& other)&noexcept {
+vector<_Ty>& vector<_Ty>::operator =(vector<_Ty>&& other) & noexcept {
 	this->~vector();
 	std::swap(_array, other._array);
 	std::swap(_size, other._size);
@@ -909,7 +1018,7 @@ vector<_Ty>::const_iterator vector<_Ty>::cend()noexcept {
 }
 //operator = func with initializer_list
 template<typename _Ty>
-vector<_Ty>& vector<_Ty>::operator=(const std::initializer_list<_Ty>&other)& {
+vector<_Ty>& vector<_Ty>::operator=(const std::initializer_list<_Ty>& other)& {
 	static_assert(std::is_copy_constructible_v<_Ty>, "the type must"
 		"be copy constructible in order to use this func");
 	static_assert(std::is_nothrow_destructible_v<_Ty>, "the type"
@@ -928,7 +1037,7 @@ vector<_Ty>& vector<_Ty>::operator=(const std::initializer_list<_Ty>&other)& {
 		}
 	}
 	catch (...) {
-		for (std::size_t j= 0; j < i; j++) {
+		for (std::size_t j = 0; j < i; j++) {
 			delete new_array[j];
 		}
 		delete[]new_array;
@@ -944,6 +1053,3 @@ vector<_Ty>& vector<_Ty>::operator=(const std::initializer_list<_Ty>&other)& {
 //-----------------------
 
 _PANAGIOTIS_END
-
-
-
