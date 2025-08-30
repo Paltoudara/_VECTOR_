@@ -178,3 +178,13 @@ also this vector accepts only elements that are nothrow destructible.
 Returns a pointer to the internal array of pointers.
 The vector retains ownership of the objects.
 Users may read or modify the objects via the pointers, but must NOT delete them.
+29) insert function it just inserts an element to the following position with copy or move and shifts other elements from index and after one position right (classic insertion to an array ),if something goes wrong the state of the vector may change see implementation details
+
+30) emplace function does the same thing with insert function but this time it constructs the object passed in place no other difference
+
+31) erase function just removes an element from the vector at the given position and it just shifts the remaining elements from the index and after one position left (classic erase to an array)
+
+32) begin,cbegin,cend,end are there for the iterator interface
+
+# ITERATOR API 
+## 🧩 Interface
