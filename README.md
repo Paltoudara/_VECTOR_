@@ -1,7 +1,6 @@
 # 🔗 Welcome to the VECTOR API 🌐 :
 ## 🧩 Interface
 
-</br>
 template <typename _Ty>
 </br>
 class vector final{
