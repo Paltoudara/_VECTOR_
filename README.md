@@ -175,6 +175,6 @@ also this vector accepts only elements that are nothrow destructible.
 27) operator with initializer_list pretty much does the same thing as the copy operator but the other is now an initializer list and not a vector,if something goes wrong this function doesn't do anything (strong guarantee)
 
 28) data function gives access to the underlying vector pretty much :
-// Returns a pointer to the internal array of pointers.
-// The vector retains ownership of the objects.
-// Users may read or modify the objects via the pointers, but must NOT delete them.
+Returns a pointer to the internal array of pointers.
+The vector retains ownership of the objects.
+Users may read or modify the objects via the pointers, but must NOT delete them.
