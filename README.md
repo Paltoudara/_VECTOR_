@@ -1,7 +1,7 @@
 # 🔗 Welcome to the VECTOR API 🌐 :
 ## 🧩 Interface
 
-template <typename _Ty>
+<pre> ```cpp template<typename _Ty> ``` </pre>
 </br>
 class vector final{
 </br>
