@@ -1,2 +1,1 @@
-# _VECTOR_
-THIS IS THE API:
+# API
