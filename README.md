@@ -4,7 +4,7 @@
 ```markdown
 ```cpp
 template<typename _Ty>
-class vector final{
+class vector final {
 public:
 	using iterator = vector_iterator<true>;
 	using const_iterator = vector_iterator<false>;
