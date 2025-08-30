@@ -6,7 +6,7 @@
 </br>
 //-----------------------
 </br>
-template<typename _Ty>
+template <typename _Ty>
 </br>
 class vector final{
 public:
