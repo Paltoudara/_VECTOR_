@@ -1,7 +1,10 @@
 # 🔗 Welcome to the VECTOR API 🌐 :
 ## 🧩 Interface
 
-<pre>cpp template<typename _Ty>  </pre>
+### ✅ Option 1: Add a dummy body
+```markdown
+```cpp
+template<typename _Ty>
 </br>
 class vector final{
 </br>
