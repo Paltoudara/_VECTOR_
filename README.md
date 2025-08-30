@@ -1,17 +1,5 @@
 # 🔗 Welcome to the VECTOR API 🌐 :
-#pragma once
-#include<iostream>
-#include<new>
-#include<algorithm>
-#include<type_traits>
-#include<cstdlib>
-#include<initializer_list>
-#include<utility>
-#include<cassert>
-#include<functional>
-#include<memory>
-#include"Header.h"
-_PANAGIOTIS_BEGIN
+
 //-----------------------
 //		INTERFACE BEGIN
 //-----------------------
