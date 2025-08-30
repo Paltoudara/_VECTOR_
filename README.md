@@ -113,6 +113,9 @@ public:
 
 
 ```
+# NOTE THAT:
+THIS IS THE INTERFACE OF THE VECTOR WITH THIS INTERFACE YOU CAN MANIPULATE THE VECTOR AND CAN USE IT IF YOU WANT MORE DETAILS ABOUT THE IMPLEMENTATION JUST SEE THE vector.h and Macros.h for how things are done
+
 1) default constructor just initializes the vector pretty much the default state of the vector: no elements no capacity no size
 
 2) a constructor that takes a capacity argument and just gives the vector this capacity or one if the capacity arg is equal to 0
@@ -124,3 +127,9 @@ public:
 5) this is the move constructor we just steal the contets of the other and we leave it in a valid state it just a vector with zero capacity and size
    
 6) capacity function just gives the capacity of the vector how many elements the vector currently can hold
+
+7) da
+
+8) size function just give the size of the  elements that are in the vector right now not how many can hold the vector itself
+
+8) 
