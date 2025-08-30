@@ -123,4 +123,4 @@ public:
 
 5) this is the move constructor we just steal the contets of the other and we leave it in a valid state it just a vector with zero capacity and size
    
-6) da
+6) capacity function just gives the capacity of the vector how many elements the vector currently can hold
