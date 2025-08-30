@@ -163,7 +163,18 @@ also this vector accepts only elements that are nothrow destructible.
 22) resize function first overload :
     1. if the size==new_size then nothing happents
     2. if the size>new_size then we pop the elements from the vector we don't change the capacity
-    3. if the size<new_size we push_back the default constructible objects of type _Ty if the new_size is greater than capacity we also reallocate space this func may change the state of the vector if something goes wrong see implementation
-23) resize function second overload does the same thing as the first overload but in the third scenario it pushes copy constructible objects of type _Ty on the vector
+    3. if the size<new_size we push_back the default constructible objects of type _Ty if the new_size is greater than capacity we also reallocate space this func may change the state of the vector, if something goes wrong see implementation
+23) resize function second overload does the same thing as the first overload but in the third scenario it pushes copy constructible objects of type _Ty on the vector(the only difference)
 
-24)
+24) copy operator just makes a deep copy of the other vector if something goes wrong copy operator doesn't do anything (strong guarantee) see implementation for more details, but pretty much is creates another vector same as the other and if it all goes good we dealloc our old vector and take this one
+
+25) assign function pretty much it creates a vector with size and capacity=count and values same as the value passed as arg ,if something goes wrong assign doesn't do anything (strong guarantee), if all goes good we dealloc our old vector and take this one
+
+26) move operator we pretty much dealloc our vector and take the contents of the other if we accidentaly move to ourselves we lose our contents be careful with this func
+
+27) operator with initializer_list pretty much does the same thing as the copy operator but the other is now an initializer list and not a vector,if something goes wrong this function doesn't do anything (strong guarantee)
+
+28) data function gives access to the underlying vector pretty much :
+// Returns a pointer to the internal array of pointers.
+// The vector retains ownership of the objects.
+// Users may read or modify the objects via the pointers, but must NOT delete them.
