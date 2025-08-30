@@ -7,6 +7,7 @@
 //-----------------------
 </br>
 template<typename _Ty>
+</br>
 class vector final{
 public:
 	using iterator = vector_iterator<true>;
