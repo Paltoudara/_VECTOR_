@@ -113,10 +113,11 @@ public:
 
 
 ```
-# NOTE THAT:
+# 📝NOTE THAT:
 THIS IS THE INTERFACE OF THE VECTOR WITH THIS INTERFACE YOU CAN MANIPULATE THE VECTOR AND CAN USE IT IF YOU WANT MORE DETAILS ABOUT THE IMPLEMENTATION JUST SEE THE vector.h and Macros.h for how things are done
 also this vector accepts only elements that are nothrow destructible.
 
+# Member functions
 1) default constructor just initializes the vector pretty much the default state of the vector: no elements no capacity no size
 
 2) a constructor that takes a capacity argument and just gives the vector this capacity or one if the capacity arg is equal to 0
