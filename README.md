@@ -11,7 +11,6 @@ public:
 	using const_iterator = vector_iterator<false>;
 	vector()noexcept;
 	vector(const std::size_t capacity);
-	//copy constructor func done
 	vector(const vector<_Ty>& other);
 	//constructor with initializer_list func done
 	vector(const std::initializer_list<_Ty>& other);
