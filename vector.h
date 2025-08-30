@@ -9,8 +9,11 @@
 #include<cassert>
 #include<functional>
 #include<memory>
-#include"Macros.h"
+#include"Header.h"
 _PANAGIOTIS_BEGIN
+//-----------------------
+//		INTERFACE BEGIN
+//-----------------------
 template<typename _Ty>
 class vector final{
 private:
@@ -214,517 +217,685 @@ private:
 		}
 	};
 	template<class _Valty>
-	void insert_element(const std::size_t index, _Valty&& _Val) {
-		if (index >= _size) {
-			push_back(std::forward<_Valty>(_Val));
-			return;
-		}
-		if (_size == _capacity) {//realloc
-			_Ty** new_array = new _Ty * [2 * _capacity + 1] {};
-			for (std::size_t i = 0; i < _size; i++) {
-				new_array[i] = _array[i];
-			}
-			delete[]_array;
-			_array = new_array;
-			_capacity = _capacity * 2 + 1;
-		}
-		_Ty* ptr{ new _Ty(std::forward<_Valty>(_Val)) };
-		for (std::size_t i = _size; i > index; i--) {
-			_array[i] = _array[i - 1];
-		}
-		_array[index] = ptr;
-		_size++;
-	}
+	void insert_element(const std::size_t index, _Valty&& _Val);
 	template<class _Valty>
-	void push_back_element(_Valty&&_Val) {
-		if (_size == _capacity) {
-			std::size_t new_capacity = _capacity * 2 + 1;
-			_Ty** new_array = new _Ty * [new_capacity] {}; // zero-initialize
-
-			for (std::size_t i = 0; i < _size; ++i) {
-				new_array[i] = _array[i]; // move pointers
-			}
-			if (_array != nullptr) {
-				delete[] _array; // delete old pointer array (not the objects)
-			}
-			_array = new_array;
-			_capacity = new_capacity;
-		}
-		_array[_size] = new _Ty(std::forward<_Valty>(_Val)); // allocate new object
-		_size++;
-	}
+	void push_back_element(_Valty&& _Val);
 public:
 	using iterator = vector_iterator<true>;
 	using const_iterator = vector_iterator<false>;
 	//default func constructor done
-	vector()noexcept :_capacity{}, _size{}, _array{}{}
+	vector()noexcept;
 	//constructor func done
-	vector(const std::size_t capacity) :
-		_size{}, _capacity{ capacity > 0 ? capacity : 1 }
-	{
-		_array = new _Ty * [capacity > 0 ? capacity : 1]{};
-	}
+	vector(const std::size_t capacity);
 	//copy constructor func done
-	vector(const vector<_Ty>& other) :_capacity{}, _size{}, _array{}
-	{
-		static_assert(std::is_copy_constructible_v<_Ty>, "the type"
-			"must be copy constructible");
-		static_assert(std::is_nothrow_destructible_v<_Ty>, "the type"
-			"must be destructible without throwing");
-		if (other._capacity == 0)return;
-		_Ty** new_array = new _Ty * [other._capacity] {};
-		std::size_t i{};
-		try {
-			for (; i < other._size; i++) {
-				new_array[i] = new _Ty(*other._array[i]);
-			}
-		}
-		catch (...) {
-			for (std::size_t j = 0; j < i; j++) {
-				delete new_array[j];
-			}
-			delete[]new_array;
-			throw 1;
-		}
-		_array = new_array;
-		_capacity = other._capacity;
-		_size = other._size;
-		
-	}
+	vector(const vector<_Ty>& other);
 	//constructor with initializer_list func done
-	vector(const std::initializer_list<_Ty>&other)
-		:_array{}, _size{}, _capacity{}
-	{
-		static_assert(std::is_copy_constructible_v<_Ty>, "the type must"
-			"be copy constructible in order to use this func");
-		static_assert(std::is_nothrow_destructible_v<_Ty>, "the type"
-			"must be destructible without throwing");
-		if (other.size() == 0)return;
-		_Ty** new_array = new _Ty * [other.size()];
-		const _Ty* ptr{ other.begin() };
-		std::size_t i{};
-		try {
-			for (; i < other.size(); i++) {
-				new_array[i] = new _Ty(*ptr);
-				ptr++;
-			}
-		}
-		catch (...) {
-			for (std::size_t j = 0; j < i; j++) {
-				delete new_array[j];
-			}
-			delete[]new_array;
-			throw 1;
-		}
-		_array = new_array;
-		_capacity = _size = other.size();
-	}
+	vector(const std::initializer_list<_Ty>& other);
 	//move constructor func done
-	vector(vector<_Ty>&& other)noexcept 
-		:_array{}, _size{}, _capacity{}
-	{
-		std::swap(_array, other._array);
-		std::swap(_capacity, other._capacity);
-		std::swap(_size, other._size);
-	}
+	vector(vector<_Ty>&& other)noexcept;
 	//capacity func done
-	std::size_t capacity()const noexcept {
-		return _capacity;
-	}
-	bool empty()const noexcept {
-		return _size == 0;
-	}
+	std::size_t capacity()const noexcept;
+	bool empty()const noexcept;
 	//size func done 
-	std::size_t size()const noexcept {
-		return _size;
-	}
+	std::size_t size()const noexcept;
 	//push_back func done
-	void push_back(const _Ty& data) {
-		static_assert(std::is_copy_constructible_v<_Ty>, "the type must be copy constructible");
-		push_back_element(data);
-	}
+	void push_back(const _Ty& data);
 	//push back func done
-	void push_back(_Ty&& data) {
-		static_assert(std::is_move_constructible_v<_Ty>, "the type must be move constructible");
-		push_back_element(std::move(data));
-	}
+	void push_back(_Ty&& data);
 	//emplace back func done
 	template<class ..._Valty>
-	void emplace_back(_Valty&&..._Val) {
-		if (_size == _capacity) {
-			std::size_t new_capacity = _capacity * 2 + 1;
-			_Ty** new_array = new _Ty * [new_capacity] {}; // zero-initialize
-
-			for (std::size_t i = 0; i < _size; ++i) {
-				new_array[i] = _array[i]; // move pointers
-			}
-			if (_array != nullptr) {
-				delete[] _array; // delete old pointer array (not the objects)
-			}
-			_array = new_array;
-			_capacity = new_capacity;
-		}
-		_array[_size] = new _Ty(std::forward<_Valty>(_Val)...); // allocate new object
-		_size++;
-	}
+	void emplace_back(_Valty&&..._Val);
 	//pop_back func done
-	void pop_back()noexcept {
-		static_assert(std::is_nothrow_destructible_v<_Ty>, "the"
-			"type must be destructible without throwing");
-		if (_size > 0) {
-			_size--;
-			delete _array[_size];
-			_array[_size] = nullptr;
-			return;
-		}//make pop back to shrink capacity when not used 
-		//some number of capacity
-	}
+	void pop_back()noexcept;
 	//
-	void show() const{
-		for (std::size_t i = 0; i < _size; i++) {
-			std::cout << *_array[i] << '\n';
-		}
-	}
+	void show() const;
 	//operator []func done 
-	const _Ty& operator [](const std::size_t index) const &
-	{
-		assert(index < _size);
-		return *_array[index];
-	}
+	const _Ty& operator [](const std::size_t index) const&;
 	//operator []func done 
-	_Ty& operator [](const std::size_t index)& {
-		assert(index < _size);
-		return *_array[index];
-	}
+	_Ty& operator [](const std::size_t index)&;
 	//operator []func done 
-	_Ty&& operator [](const std::size_t index)&&
-	{
-		assert(index < _size);
-		return std::move(*_array[index]);
-	}
+	_Ty&& operator [](const std::size_t index)&&;
 	//operator []func done 
-	const _Ty&& operator [](const std::size_t index)const&& {
-		assert(index < _size);
-		return std::move(*_array[index]);
-	}
+	const _Ty&& operator [](const std::size_t index)const&&;
 	//at func done 
-	const _Ty& at(const std::size_t index) const&
-	{
-		if (index < _size) {
-			return *_array[index];
-		}
-		throw out_of_bounds{"tried to access invalid pos"};
-	}
+	const _Ty& at(const std::size_t index) const&;
 	//at func done 
-	_Ty& at(const std::size_t index)& {
-		if (index < _size) {
-			return *_array[index];
-		}
-		throw out_of_bounds{ "tried to access invalid pos" };
-	}
+	_Ty& at(const std::size_t index)&;
 	//at func done 
-	_Ty&& at(const std::size_t index)&&
-	{
-		if (index < _size) {
-			return std::move(*_array[index]);
-		}
-		throw out_of_bounds{ "tried to access invalid pos" };
-	}
+	_Ty&& at(const std::size_t index)&&;
 	//at func done 
-	const _Ty&& at(const std::size_t index)const&& {
-		if (index < _size) {
-			return std::move(*_array[index]);
-		}
-		throw out_of_bounds{ "tried to access invalid pos" };
-	}
+	const _Ty&& at(const std::size_t index)const&&;
 	//destructor done
-	~vector()noexcept {
-		static_assert(std::is_nothrow_destructible_v<_Ty>,
-			"the type must be destructible without throwing");
-		if (_array != nullptr) {
-			for (std::size_t i = 0; i < _size; i++) {
-				delete _array[i];
-			}
-			delete[]_array;
-		}
-		_array = nullptr;
-		_capacity = _size = 0;
-	}
+	~vector()noexcept;
 	//clear func done 
-	void clear()noexcept {
-		static_assert(std::is_nothrow_destructible_v<_Ty>,
-			"the type must be destructible without throwing");
-		for (std::size_t i = 0; i < _size; i++) {
-			delete _array[i];
-			_array[i] = nullptr;
-		}
-		_size = 0;
-	}
+	void clear()noexcept;
 	//front func done
-	const _Ty& front() const&
-	{
-		assert(!empty());
-		return *_array[0];
-	}
+	const _Ty& front() const&;
 	//front func done 
-	_Ty& front()& {
-		assert(!empty());
-		return *_array[0];
-	}
+	_Ty& front()&;
 	//front func done
-	_Ty&& front()&&
-	{
-		assert(!empty());
-		return std::move(*_array[0]);
-	}
+	_Ty&& front()&&;
 	//front func done
-	const _Ty&& front()const&& {
-		assert(!empty());
-		return std::move(*_array[0]);
-	}
+	const _Ty&& front()const&&;
 	//back func done
-	const _Ty& back() const&
-	{
-		assert(!empty());
-		return *_array[_size-1];
-	}
+	const _Ty& back() const&;
 	//back func done 
-	_Ty& back()& {
-		assert(!empty());
-		return *_array[_size-1];
-	}
+	_Ty& back()&;
 	//back func done
-	_Ty&& back()&&
-	{
-		assert(!empty());
-		return std::move(*_array[_size-1]);
-	}
+	_Ty&& back()&&;
 	//back func done
-	const _Ty&& back()const&& {
-		assert(!empty());
-		return std::move(*_array[_size-1]);
-	}
+	const _Ty&& back()const&&;
 	//swap func done
-	void swap(vector<_Ty>&other)noexcept {
-		if (this != &other) {
-			std::swap(_array, other._array);
-			std::swap(_size, other._size);
-			std::swap(_capacity, other._capacity);
-		}
-	}
+	void swap(vector<_Ty>& other)noexcept;
 	//reserve func done
-	void reserve(const std::size_t new_capacity) {
-		if (new_capacity > _capacity) {
-			_Ty** new_array = new _Ty * [new_capacity] {};
-			for (std::size_t i = 0; i < _size; i++) {
-				new_array[i] = _array[i];
-			}
-			if (_array != nullptr) {
-				delete[]_array;
-			}
-			_array = new_array;
-			_capacity = new_capacity;
-		}
+	void reserve(const std::size_t new_capacity);
+	//shring_to_fit func done
+	void shrink_to_fit();
+	//resize func done
+	void resize(const std::size_t new_size);
+	//resize func done
+	void resize(const std::size_t new_size, const _Ty& value);
+	//copy operator func done
+	vector<_Ty>& operator =(const vector<_Ty>& other)&;
+	//assign func done
+	void assign(const std::size_t count, const _Ty& value);
+	//move operator func done
+	vector<_Ty>& operator =(vector<_Ty>&& other) & noexcept;
+	// Returns a pointer to the internal array of pointers.
+	// The vector retains ownership of the objects.
+	// Users may read or modify the objects via the pointers, but must NOT delete them.
+	_Ty** data()noexcept;
+	//implement one insert 
+	void insert(const std::size_t index, const _Ty& value);
+	void insert(const std::size_t index, _Ty&& value);
+	template<class..._Valty>
+	void emplace(const std::size_t index, _Valty&&..._Val);
+	//prosoxh stous invalid iteratos se pointers pou den yparxoun pleon
+	void erase(const std::size_t index)noexcept;
+	iterator begin()noexcept;
+	iterator end()noexcept;
+	const_iterator cbegin()noexcept;
+	const_iterator cend()noexcept;
+	
+};
+//-----------------------
+//		INTERFACE END
+//-----------------------
+
+
+//-----------------------
+//		IMPLEMENTATION BEGIN
+//-----------------------
+
+//insert_element func done
+template<typename _Ty>
+template<class _Valty>
+void vector<_Ty>::insert_element(const std::size_t index, _Valty&& _Val) {
+	if (index >= _size) {
+		push_back(std::forward<_Valty>(_Val));
 		return;
 	}
-	//shring_to_fit func done
-	void shrink_to_fit() {
-		if (_size == _capacity) return;
-		if (_size == 0) {
-			delete[] _array;
-			_array = nullptr;
-			_capacity = 0;
-			return;
-		}
-		_Ty** new_array = new _Ty * [_size] {};
+	if (_size == _capacity) {//realloc
+		_Ty** new_array = new _Ty * [2 * _capacity + 1] {};
 		for (std::size_t i = 0; i < _size; i++) {
 			new_array[i] = _array[i];
 		}
 		delete[]_array;
 		_array = new_array;
-		_capacity = _size;
+		_capacity = _capacity * 2 + 1;
 	}
-	//resize func done
-	void resize(const std::size_t new_size) {
-		static_assert(std::is_default_constructible_v<_Ty>, "the type must"
-			"be default constructible");
-		static_assert(std::is_nothrow_destructible_v<_Ty>, "the type must"
-			"be destructible without throwing");
-		if (_size > new_size) {//smaller size,use pop_back
-			std::size_t iterations{ _size - new_size };
-			for (std::size_t i = 0; i < iterations; i++) {
-				_size--;
-				delete _array[_size];
-				_array[_size] = nullptr;
-			}
-		}
-		else if (_size < new_size) {//bigger size,use push_back
-			std::size_t iterations{ new_size - _size };
-			if (new_size > _capacity) {
-				reserve(new_size);
-			}
-			for (std::size_t i = 0; i < iterations; i++) {
-				_array[_size] = new _Ty{}; // allocate new object
-				_size++;
-			}
-		}
+	_Ty* ptr{ new _Ty(std::forward<_Valty>(_Val)) };
+	for (std::size_t i = _size; i > index; i--) {
+		_array[i] = _array[i - 1];
 	}
-	//resize func done
-	void resize(const std::size_t new_size,const _Ty&value) {
-		static_assert(std::is_copy_constructible_v<_Ty>, "the type must"
-			"be copy constructible");
-		static_assert(std::is_nothrow_destructible_v<_Ty>, "the type must"
-			"be destructible without throwing");
-		if (_size > new_size) {//smaller size,use pop_back
-			std::size_t iterations{ _size - new_size };
-			for (std::size_t i = 0; i < iterations; i++) {
-				_size--;
-				delete _array[_size];
-				_array[_size] = nullptr;
-			}
-		}
-		else if (_size < new_size) {//bigger size,use push_back
-			std::size_t iterations{ new_size - _size };
-			if (new_size > _capacity) {
-				reserve(new_size);
-			}
-			for (std::size_t i = 0; i < iterations; i++) {
-				_array[_size] = new _Ty(value); // allocate new object
-				_size++;
-			}
-		}
-	}
-	//copy operator func done
-	vector<_Ty>& operator =(const vector<_Ty>& other) {
-		static_assert(std::is_nothrow_destructible_v<_Ty>, "the type"
-			"must be destructible without throwing");
-		if (other._capacity == 0) {
-			this->~vector();
-			return *this;
-		}
-		_Ty** new_array = new _Ty * [other._capacity] {};
-		std::size_t i{};
-		try {
-			for (; i < other._size; i++) {
-				new_array[i] = new _Ty(*other._array[i]);
-			}
-		}
-		catch (...) {
-			for (std::size_t j = 0; j < i; j++) {
-				delete new_array[j];
-			}
-			delete[]new_array;
-			throw 1;
-		}
-		this->~vector();
-		_array = new_array;
-		_capacity = other._capacity;
-		_size = other._size;
-		return *this;
+	_array[index] = ptr;
+	_size++;
+}
+//push_back_element func done
+template<typename _Ty>
+template<class _Valty>
+void vector<_Ty>::push_back_element(_Valty&& _Val) {
+	if (_size == _capacity) {
+		std::size_t new_capacity = _capacity * 2 + 1;
+		_Ty** new_array = new _Ty * [new_capacity] {}; // zero-initialize
 
-	}
-	//assign func done
-	void assign(const std::size_t count, const _Ty& value) {
-		static_assert(std::is_copy_constructible_v<_Ty>, "the type must"
-			"be copy assignable");
-		static_assert(std::is_nothrow_destructible_v<_Ty>, "the type"
-			"must be destructible without throwing");
-		if (count == 0) {
-			clear();
-			return;
+		for (std::size_t i = 0; i < _size; ++i) {
+			new_array[i] = _array[i]; // move pointers
 		}
-		_Ty** new_array = new _Ty * [count] {};
-		std::size_t i{};
-		try {
-			for (; i < count; i++) {
-				new_array[i] = new _Ty(value);
-			}
+		if (_array != nullptr) {
+			delete[] _array; // delete old pointer array (not the objects)
 		}
-		catch (...) {
-			for (std::size_t j = 0; j< i; j++) {
-				delete new_array[j];
-			}
-			delete[]new_array;
-			throw 1;
-		}
-		this->~vector();
 		_array = new_array;
-		_capacity = _size = count;
-		
+		_capacity = new_capacity;
 	}
-	//move operator func done
-	vector<_Ty>& operator =(vector<_Ty>&& other)&noexcept {
-		this->~vector();
+	_array[_size] = new _Ty(std::forward<_Valty>(_Val)); // allocate new object
+	_size++;
+}
+//defaul constructor func done
+template<typename _Ty>
+vector<_Ty>::vector()
+noexcept :_capacity{}, _size{}, _array{} {}
+//constructor func done
+template<typename _Ty>
+vector<_Ty>::vector(const std::size_t capacity) :
+	_size{}, _capacity{ capacity > 0 ? capacity : 1 }
+{
+	_array = new _Ty * [capacity > 0?capacity:1]{};
+}
+//copy constructor func done
+template<typename _Ty>
+vector<_Ty>::vector(const vector<_Ty>& other) :_capacity{}, _size{}, _array{}
+{
+	static_assert(std::is_copy_constructible_v<_Ty>, "the type"
+		"must be copy constructible");
+	static_assert(std::is_nothrow_destructible_v<_Ty>, "the type"
+		"must be destructible without throwing");
+	if (other._capacity == 0)return;
+	_Ty** new_array = new _Ty * [other._capacity] {};
+	std::size_t i{};
+	try {
+		for (; i < other._size; i++) {
+			new_array[i] = new _Ty(*other._array[i]);
+		}
+	}
+	catch (...) {
+		for (std::size_t j = 0; j < i; j++) {
+			delete new_array[j];
+		}
+		delete[]new_array;
+		throw 1;
+	}
+	_array = new_array;
+	_capacity = other._capacity;
+	_size = other._size;
+}
+//constructor with initializer list done
+template<typename _Ty>
+vector<_Ty>::vector(const std::initializer_list<_Ty>& other)
+	:_array{}, _size{}, _capacity{}
+{
+	static_assert(std::is_copy_constructible_v<_Ty>, "the type must"
+		"be copy constructible in order to use this func");
+	static_assert(std::is_nothrow_destructible_v<_Ty>, "the type"
+		"must be destructible without throwing");
+	if (other.size() == 0)return;
+	_Ty** new_array = new _Ty * [other.size()];
+	const _Ty* ptr{ other.begin() };
+	std::size_t i{};
+	try {
+		for (; i < other.size(); i++) {
+			new_array[i] = new _Ty(*ptr);
+			ptr++;
+		}
+	}
+	catch (...) {
+		for (std::size_t j = 0; j < i; j++) {
+			delete new_array[j];
+		}
+		delete[]new_array;
+		throw 1;
+	}
+	_array = new_array;
+	_capacity = _size = other.size();
+}
+//move constructor func done
+template<typename _Ty>
+vector<_Ty>::vector(vector<_Ty>&&other)noexcept
+	:_array{}, _size{}, _capacity{}
+{
+	std::swap(_array, other._array);
+	std::swap(_capacity, other._capacity);
+	std::swap(_size, other._size);
+}
+//capacity func done
+template<typename _Ty>
+std::size_t vector<_Ty>::capacity()const noexcept {
+	return _capacity;
+}
+//empty func done
+template<typename _Ty>
+bool vector<_Ty>::empty()const noexcept {
+	return _size == 0;
+}
+//size func done
+template<typename _Ty>
+std::size_t vector<_Ty>::size()const noexcept {
+	return _size;
+}
+//push_back func done
+template<typename _Ty>
+void vector<_Ty>::push_back(const _Ty& data) {
+	static_assert(std::is_copy_constructible_v<_Ty>, "the type must be copy constructible");
+	push_back_element(data);
+}
+//push_back func done
+template<typename _Ty>
+void vector<_Ty>::push_back(_Ty&& data) {
+	static_assert(std::is_move_constructible_v<_Ty>, "the type must be move constructible");
+	push_back_element(std::move(data));
+}
+//emplace_back func done
+template<typename _Ty>
+template<class ..._Valty>
+void vector<_Ty>::emplace_back(_Valty&&..._Val) {
+	if (_size == _capacity) {
+		std::size_t new_capacity = _capacity * 2 + 1;
+		_Ty** new_array = new _Ty * [new_capacity] {}; // zero-initialize
+
+		for (std::size_t i = 0; i < _size; ++i) {
+			new_array[i] = _array[i]; // move pointers
+		}
+		if (_array != nullptr) {
+			delete[] _array; // delete old pointer array (not the objects)
+		}
+		_array = new_array;
+		_capacity = new_capacity;
+	}
+	_array[_size] = new _Ty(std::forward<_Valty>(_Val)...); // allocate new object
+	_size++;
+}
+//pop_back func done
+template<typename _Ty>
+void vector<_Ty>::pop_back()noexcept {
+	static_assert(std::is_nothrow_destructible_v<_Ty>, "the"
+		"type must be destructible without throwing");
+	if (_size > 0) {
+		_size--;
+		delete _array[_size];
+		_array[_size] = nullptr;
+		return;
+	}//pop_back doesn't shrink capacity for simplicity
+	//if you wanna shrink capacity use shrink to fit 
+}
+//show func done
+template<typename _Ty>
+void vector<_Ty>::show()const {
+	for (std::size_t i = 0; i < _size; i++) {
+		std::cout << *_array[i] << '\n';
+	}
+}
+//operator []func done 
+template<typename _Ty>
+const _Ty& vector<_Ty>::operator [](const std::size_t index) const&
+{
+	assert(index < _size);
+	return *_array[index];
+}
+//operator []func done
+template<typename _Ty>
+_Ty& vector<_Ty>::operator [](const std::size_t index)& {
+	assert(index < _size);
+	return *_array[index];
+}
+//operator []func done 
+template<typename _Ty>
+_Ty&& vector<_Ty>::operator [](const std::size_t index)&&
+{
+	assert(index < _size);
+	return std::move(*_array[index]);
+}
+//operator []func done 
+template<typename _Ty>
+const _Ty&& vector<_Ty>::operator [](const std::size_t index)const&& {
+	assert(index < _size);
+	return std::move(*_array[index]);
+}
+//at func done 
+template<typename _Ty>
+const _Ty& vector<_Ty>::at(const std::size_t index) const&
+{
+	if (index < _size) {
+		return *_array[index];
+	}
+	throw out_of_bounds{ "tried to access invalid pos" };
+}
+//at func done 
+template<typename _Ty>
+_Ty& vector<_Ty>::at(const std::size_t index)& {
+	if (index < _size) {
+		return *_array[index];
+	}
+	throw out_of_bounds{ "tried to access invalid pos" };
+}
+//at func done 
+template<typename _Ty>
+_Ty&& vector<_Ty>::at(const std::size_t index)&&
+{
+	if (index < _size) {
+		return std::move(*_array[index]);
+	}
+	throw out_of_bounds{ "tried to access invalid pos" };
+}
+//at func done 
+template<typename _Ty>
+const _Ty&& vector<_Ty>::at(const std::size_t index)const&& {
+	if (index < _size) {
+		return std::move(*_array[index]);
+	}
+	throw out_of_bounds{ "tried to access invalid pos" };
+}
+//destructor func done
+template<typename _Ty>
+vector<_Ty>::~vector()noexcept {
+	static_assert(std::is_nothrow_destructible_v<_Ty>,
+		"the type must be destructible without throwing");
+	if (_array != nullptr) {
+		for (std::size_t i = 0; i < _size; i++) {
+			delete _array[i];
+		}
+		delete[]_array;
+	}
+	_array = nullptr;
+	_capacity = _size = 0;
+}
+//clear func done
+template<typename _Ty>
+void vector<_Ty>::clear()noexcept {
+	static_assert(std::is_nothrow_destructible_v<_Ty>,
+		"the type must be destructible without throwing");
+	for (std::size_t i = 0; i < _size; i++) {
+		delete _array[i];
+		_array[i] = nullptr;
+	}
+	_size = 0;
+}
+//front func done
+template<typename _Ty>
+const _Ty& vector<_Ty>::front() const&
+{
+	assert(!empty());
+	return *_array[0];
+}
+//front func done 
+template<typename _Ty>
+_Ty& vector<_Ty>::front()& {
+	assert(!empty());
+	return *_array[0];
+}
+//front func done
+template<typename _Ty>
+_Ty&& vector<_Ty>::front()&&
+{
+	assert(!empty());
+	return std::move(*_array[0]);
+}
+//front func done
+template<typename _Ty>
+const _Ty&& vector<_Ty>::front()const&& {
+	assert(!empty());
+	return std::move(*_array[0]);
+}
+//back func done
+template<typename _Ty>
+const _Ty& vector<_Ty>::back() const&
+{
+	assert(!empty());
+	return *_array[_size - 1];
+}
+//back func done 
+template<typename _Ty>
+_Ty& vector<_Ty>::back()& {
+	assert(!empty());
+	return *_array[_size - 1];
+}
+//back func done
+template<typename _Ty>
+_Ty&& vector<_Ty>::back()&&
+{
+	assert(!empty());
+	return std::move(*_array[_size - 1]);
+}
+//back func done
+template<typename _Ty>
+const _Ty&& vector<_Ty>::back()const&& {
+	assert(!empty());
+	return std::move(*_array[_size - 1]);
+}
+//swap func done
+template<typename _Ty>
+void vector<_Ty>::swap(vector<_Ty>& other)noexcept {
+	if (this != &other) {
 		std::swap(_array, other._array);
 		std::swap(_size, other._size);
 		std::swap(_capacity, other._capacity);
+	}
+}
+//reserve func done
+template<typename _Ty>
+void vector<_Ty>::reserve(const std::size_t new_capacity) {
+	if (new_capacity > _capacity) {
+		_Ty** new_array = new _Ty * [new_capacity] {};
+		for (std::size_t i = 0; i < _size; i++) {
+			new_array[i] = _array[i];
+		}
+		if (_array != nullptr) {
+			delete[]_array;
+		}
+		_array = new_array;
+		_capacity = new_capacity;
+	}
+	return;
+}
+//shrink_to_fit func done
+template<typename _Ty>
+void vector<_Ty>::shrink_to_fit() {
+	if (_size == _capacity) return;
+	if (_size == 0) {
+		delete[] _array;
+		_array = nullptr;
+		_capacity = 0;
+		return;
+	}
+	_Ty** new_array = new _Ty * [_size] {};
+	for (std::size_t i = 0; i < _size; i++) {
+		new_array[i] = _array[i];
+	}
+	delete[]_array;
+	_array = new_array;
+	_capacity = _size;
+}
+//
+template<typename _Ty>
+void vector<_Ty>::resize(const std::size_t new_size) {
+	static_assert(std::is_default_constructible_v<_Ty>, "the type must"
+		"be default constructible");
+	static_assert(std::is_nothrow_destructible_v<_Ty>, "the type must"
+		"be destructible without throwing");
+	if (_size > new_size) {//smaller size,use pop_back
+		std::size_t iterations{ _size - new_size };
+		for (std::size_t i = 0; i < iterations; i++) {
+			_size--;
+			delete _array[_size];
+			_array[_size] = nullptr;
+		}
+	}
+	else if (_size < new_size) {//bigger size,use push_back
+		std::size_t iterations{ new_size - _size };
+		if (new_size > _capacity) {
+			reserve(new_size);
+		}
+		for (std::size_t i = 0; i < iterations; i++) {
+			_array[_size] = new _Ty{}; // allocate new object
+			_size++;
+		}
+	}
+}
+//resize func done
+template<typename _Ty>
+void vector<_Ty>::resize(const std::size_t new_size, const _Ty& value) {
+	static_assert(std::is_copy_constructible_v<_Ty>, "the type must"
+		"be copy constructible");
+	static_assert(std::is_nothrow_destructible_v<_Ty>, "the type must"
+		"be destructible without throwing");
+	if (_size > new_size) {//smaller size,use pop_back
+		std::size_t iterations{ _size - new_size };
+		for (std::size_t i = 0; i < iterations; i++) {
+			_size--;
+			delete _array[_size];
+			_array[_size] = nullptr;
+		}
+	}
+	else if (_size < new_size) {//bigger size,use push_back
+		std::size_t iterations{ new_size - _size };
+		if (new_size > _capacity) {
+			reserve(new_size);
+		}
+		for (std::size_t i = 0; i < iterations; i++) {
+			_array[_size] = new _Ty(value); // allocate new object
+			_size++;
+		}
+	}
+}
+//copy operator func done
+template<typename _Ty>
+vector<_Ty>& vector<_Ty>::operator =(const vector<_Ty>& other)& {
+	static_assert(std::is_nothrow_destructible_v<_Ty>, "the type"
+		"must be destructible without throwing");
+	if (other._capacity == 0) {
+		this->~vector();
 		return *this;
 	}
-	// Returns a pointer to the internal array of pointers.
-	// The vector retains ownership of the objects.
-	// Users may read or modify the objects via the pointers, but must NOT delete them.
-	_Ty** data()noexcept {
-		return _array;
-	}
-	//implement one insert 
-	void insert(const std::size_t index,const _Ty& value) {
-		static_assert(std::is_copy_constructible_v<_Ty>, "the type"
-			"must be copy constructible");
-		insert_element(index, value);
-	}
-	void insert(const std::size_t index,  _Ty&& value) {
-		static_assert(std::is_move_constructible_v<_Ty>, "the type"
-			"must be move constructible");
-		insert_element(index, std::move(value));
-	}
-	template<class..._Valty>
-	void emplace(const std::size_t index, _Valty&&..._Val) {
-		if (index >= _size) {
-			emplace_back(std::forward<_Valty>(_Val)...);
-			return;
+	_Ty** new_array = new _Ty * [other._capacity] {};
+	std::size_t i{};
+	try {
+		for (; i < other._size; i++) {
+			new_array[i] = new _Ty(*other._array[i]);
 		}
-		if (_size == _capacity) {//realloc
-			_Ty** new_array = new _Ty * [2 * _capacity + 1] {};
-			for (std::size_t i = 0; i < _size; i++) {
-				new_array[i] = _array[i];
-			}
-			delete[]_array;
-			_array = new_array;
-			_capacity = _capacity * 2 + 1;
+	}
+	catch (...) {
+		for (std::size_t j = 0; j < i; j++) {
+			delete new_array[j];
 		}
-		_Ty* ptr{ new _Ty(std::forward<_Valty>(_Val)...) };
-		for (std::size_t i = _size; i > index; i--) {
-			_array[i] = _array[i - 1];
+		delete[]new_array;
+		throw 1;
+	}
+	this->~vector();
+	_array = new_array;
+	_capacity = other._capacity;
+	_size = other._size;
+	return *this;
+
+}
+//assign func done
+template<typename _Ty>
+void vector<_Ty>::assign(const std::size_t count, const _Ty& value) {
+	static_assert(std::is_copy_constructible_v<_Ty>, "the type must"
+		"be copy assignable");
+	static_assert(std::is_nothrow_destructible_v<_Ty>, "the type"
+		"must be destructible without throwing");
+	if (count == 0) {
+		clear();
+		return;
+	}
+	_Ty** new_array = new _Ty * [count] {};
+	std::size_t i{};
+	try {
+		for (; i < count; i++) {
+			new_array[i] = new _Ty(value);
 		}
-		_array[index] = ptr;
-		_size++;
 	}
-	//prosoxh stous invalid iteratos se pointers pou den yparxoun pleon
-	void erase(const std::size_t index)noexcept {
-		static_assert(std::is_nothrow_destructible_v<_Ty>, "the type"
-			"must be destructible without throwing");
-		if (index >= _size)return;
-		delete _array[index];
-		//apo ekei kai pera shift
-		for (std::size_t i = index; i < _size-1; i++) {
-			_array[i] = _array[i + 1];
+	catch (...) {
+		for (std::size_t j = 0; j < i; j++) {
+			delete new_array[j];
 		}
-		_array[_size - 1] = nullptr;
-		_size--;
+		delete[]new_array;
+		throw 1;
 	}
-	iterator begin()noexcept {
-		return { 0,this };
+	this->~vector();
+	_array = new_array;
+	_capacity = _size = count;
+
+}
+//move operator func done
+template<typename _Ty>
+vector<_Ty>& vector<_Ty>::operator =(vector<_Ty>&& other)&noexcept {
+	this->~vector();
+	std::swap(_array, other._array);
+	std::swap(_size, other._size);
+	std::swap(_capacity, other._capacity);
+	return *this;
+}
+// Returns a pointer to the internal array of pointers.
+// The vector retains ownership of the objects.
+// Users may read or modify the objects via the pointers, but must NOT delete them.
+template<typename _Ty>
+_Ty** vector<_Ty>::data()noexcept {
+	return _array;
+}
+//implement one insert 
+template<typename _Ty>
+void vector<_Ty>::insert(const std::size_t index, const _Ty& value) {
+	static_assert(std::is_copy_constructible_v<_Ty>, "the type"
+		"must be copy constructible");
+	insert_element(index, value);
+}
+template<typename _Ty>
+void vector<_Ty>::insert(const std::size_t index, _Ty&& value) {
+	static_assert(std::is_move_constructible_v<_Ty>, "the type"
+		"must be move constructible");
+	insert_element(index, std::move(value));
+}
+template<typename _Ty>
+template<class..._Valty>
+void vector<_Ty>::emplace(const std::size_t index, _Valty&&..._Val) {
+	if (index >= _size) {
+		emplace_back(std::forward<_Valty>(_Val)...);
+		return;
 	}
-	iterator end()noexcept {
-		return { _size,this };
+	if (_size == _capacity) {//realloc
+		_Ty** new_array = new _Ty * [2 * _capacity + 1] {};
+		for (std::size_t i = 0; i < _size; i++) {
+			new_array[i] = _array[i];
+		}
+		delete[]_array;
+		_array = new_array;
+		_capacity = _capacity * 2 + 1;
 	}
-	const_iterator cbegin()noexcept {
-		return { 0,this };
+	_Ty* ptr{ new _Ty(std::forward<_Valty>(_Val)...) };
+	for (std::size_t i = _size; i > index; i--) {
+		_array[i] = _array[i - 1];
 	}
-	const_iterator cend()noexcept {
-		return { _size,this };
+	_array[index] = ptr;
+	_size++;
+}
+//prosoxh stous invalid iteratos se pointers pou den yparxoun pleon
+template<typename _Ty>
+void vector<_Ty>::erase(const std::size_t index)noexcept {
+	static_assert(std::is_nothrow_destructible_v<_Ty>, "the type"
+		"must be destructible without throwing");
+	if (index >= _size)return;
+	delete _array[index];
+	//apo ekei kai pera shift
+	for (std::size_t i = index; i < _size - 1; i++) {
+		_array[i] = _array[i + 1];
 	}
-};
+	_array[_size - 1] = nullptr;
+	_size--;
+}
+//begin func done
+template<typename _Ty>
+vector<_Ty>::iterator vector<_Ty>::begin()noexcept {
+	return { 0,this };
+}
+//end func done
+template<typename _Ty>
+vector<_Ty>::iterator vector<_Ty>::end()noexcept {
+	return { _size,this };
+}
+//cbegin func done
+template<typename _Ty>
+vector<_Ty>::const_iterator vector<_Ty>::cbegin()noexcept {
+	return { 0,this };
+}
+//cend func done
+template<typename _Ty>
+vector<_Ty>::const_iterator vector<_Ty>::cend()noexcept {
+	return { _size,this };
+}
+
+//-----------------------
+//		IMPLEMENTATION END
+//-----------------------
 
 _PANAGIOTIS_END
 
