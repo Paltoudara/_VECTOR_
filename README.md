@@ -13,7 +13,9 @@ class vector final{
 public:
 </br>
 	using iterator = vector_iterator<true>;
+	</br>
 	using const_iterator = vector_iterator<false>;
+		</br>
 	//default func constructor done
 	vector()noexcept;
 	//constructor func done
