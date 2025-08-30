@@ -8,7 +8,7 @@ class vector final {
 public:
 	using iterator = vector_iterator<true>;
 	using const_iterator = vector_iterator<false>;
-	//constructor
+
 	vector()noexcept;
 
 	vector(const std::size_t capacity);
