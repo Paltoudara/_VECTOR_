@@ -17,6 +17,10 @@ _PANAGIOTIS_BEGIN
 template<typename _Ty>
 class vector final{
 private:
+	//private members an array of pointers
+	//a size and a capacity
+	//size shows how many elements the vector currently has
+	//capacity shows how many elements the vector can hold
 	std::size_t _capacity;
 	std::size_t _size;
 	_Ty** _array;
@@ -24,42 +28,44 @@ private:
 	//don't use and iterator when it is invalid
 	//THIS iterator is pretty much a wrapper around a pointer and an index 
 	//all the constructors do the same thing they just initialize the _index,_owner
+	//and also all the copy and move operators and destructors
 	template<bool value>
 	class vector_iterator final{
 	private:
 		std::size_t _index;
 		vector<_Ty> * _owner;
 		friend class vector;
+		//this cosntructor is private because it i only used with the begin,cbegin,cend,end functions
 		vector_iterator(const std::size_t index,vector<_Ty>* const owner)
 			noexcept :_index{ index }, _owner{ owner }{ }
 	public:
-		//
+		//default state of the iterator
 		vector_iterator()
 			noexcept:_index{},_owner{}{ }
-		//
+		//copy constructor default behavior
 		vector_iterator(const vector_iterator& other)noexcept = default;
-		//
+		//move constructor default behavior
 		vector_iterator(vector_iterator&& other)noexcept = default;
-		//
+		//copy operator we don't need to check it the other iterator is invalid it is your responsibility to not assign to another iterator 
 		vector_iterator operator=(const vector_iterator& other)noexcept {
 			_index = other._index;
 			_owner = other._owner;
 			return *this;
 		}
-		//
+		//move operator we don't need to check it the other iterator is invalid it is your responsibility to not assign to another iterator
 		vector_iterator operator=(vector_iterator&& other)noexcept {
 			_index = other._index;
 			_owner = other._owner;
 			return *this;
 		}
-		//
+		//operator ++ we only increment the iterator if it is in the range [0,size-1]
 		vector_iterator operator ++()noexcept{
 			if (_owner != nullptr &&_index<_owner->_size) {
 				_index++;
 			}
 			return { _index,_owner };
 		}
-		//
+		//operator ++ we only increment the iterator if it is in the range [0,size-1]
 		vector_iterator operator++(int)noexcept {
 			vector_iterator tmp{ _index,_owner };
 			if (_owner != nullptr && _index<_owner->_size) {
