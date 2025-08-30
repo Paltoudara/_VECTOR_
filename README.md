@@ -1,7 +1,6 @@
 # 🔗 Welcome to the VECTOR API 🌐 :
 ## 🧩 Interface
 
-### ✅ Option 1: Add a dummy body
 ```markdown
 ```cpp
 template<typename _Ty>
