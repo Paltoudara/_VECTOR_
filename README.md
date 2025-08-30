@@ -117,7 +117,7 @@ public:
 THIS IS THE INTERFACE OF THE VECTOR WITH THIS INTERFACE YOU CAN MANIPULATE THE VECTOR AND CAN USE IT IF YOU WANT MORE DETAILS ABOUT THE IMPLEMENTATION JUST SEE THE vector.h and Macros.h for how things are done
 also this vector accepts only elements that are nothrow destructible.
 
-# Member functions
+# ⚙️Member functions
 1) default constructor just initializes the vector pretty much the default state of the vector: no elements no capacity no size
 
 2) a constructor that takes a capacity argument and just gives the vector this capacity or one if the capacity arg is equal to 0
@@ -134,7 +134,7 @@ also this vector accepts only elements that are nothrow destructible.
 
 8) size function just give the size of the  elements that are in the vector right now not how many can hold the vector itself
 
-9) push_back just pushes  an element by copy or move to the vector, if the vector doesn't have enough capacity size==capacity then we reallocate a new vector that has capacity doubled over the previous if something goes wrong push_back does nothing (strong guarantee)
+9) push_back just pushes  an element by copy or move to the vector, if the vector doesn't have enough capacity size==capacity then we reallocate a new vector that has capacity doubled over the previous, if something goes wrong push_back does nothing (strong guarantee)
 
 10) emplace_back does the same thing as push_back the only difference is that it just constructs the element in place and then pushes it back simple
 
@@ -144,10 +144,20 @@ also this vector accepts only elements that are nothrow destructible.
 
 13) operator [] we use it just to access the vector and change its contents this doesn't check in release if you passed valid index(use with care)
 
-14) at func this func we use it for the same purpose as operator [] but we check if the index is valid and then we throw for invalid indexes
+14) at function this func we use it for the same purpose as operator [] but we check if the index is valid and then we throw for invalid indexes
 
-15) destructor justs destroys the vector and frees the memory and all the size=capacity=0\
+15) destructor function justs destroys the vector and frees the memory and all the size=capacity=0
 
-16) clear func it just deletes all the elements in the vector but doesn't affect capacity it justs affects size and makes it 0
+16) clear function it just deletes all the elements in the vector but doesn't affect capacity it justs affects size and makes it 0
 
-17) front func it justs give the first element of the vector 
+17) front function it just gives the first element of the vector it doesn't check on release if the vector has any elements (use with care)
+
+18)back function it just gives the last element of the vector it doesn't check on release if the vector has any elements (use with care)
+
+19) swap functions just swaps the contents of two vectors
+
+20)reserve just changes the capacity of the vector if you give a greater capacity of what the vector currently has, if something goes wrong  reserve doesn't do anything (strong guarantee)
+
+21) shrink_to_fit function just shrinks the capacity of the vector to be equal to the size  of the vector, if something goes wrong shrink_to_fit doesn't do anything (strong guarantee)
+
+22) resize function just 
