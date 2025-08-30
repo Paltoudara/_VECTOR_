@@ -160,4 +160,8 @@ also this vector accepts only elements that are nothrow destructible.
 
 21) shrink_to_fit function just shrinks the capacity of the vector to be equal to the size  of the vector, if something goes wrong shrink_to_fit doesn't do anything (strong guarantee)
 
-22) resize function just 
+22) resize function first overload :
+    1) if the size==new_size then nothing happents
+    2) if the size>new_size then we pop the elements from the vector we don't change the capacity
+    3) if the size<new_size we push_back the default constructible objects of type _Ty if the new_size is greater than capacity we also reallocate space this func may change the state of the vector if something goes wrong see implementation
+23) resize function second overload
