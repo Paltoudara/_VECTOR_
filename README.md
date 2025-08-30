@@ -10,7 +10,6 @@ public:
 	using iterator = vector_iterator<true>;
 	using const_iterator = vector_iterator<false>;
 	vector()noexcept;
-	//constructor func done
 	vector(const std::size_t capacity);
 	//copy constructor func done
 	vector(const vector<_Ty>& other);
