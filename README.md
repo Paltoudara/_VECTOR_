@@ -12,7 +12,7 @@ public:
 
 vector()noexcept;
 
-	vector(const std::size_t capacity);
+vector(const std::size_t capacity);
 
 	vector(const vector<_Ty>& other);
 
