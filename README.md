@@ -9,7 +9,6 @@ class vector final{
 public:
 	using iterator = vector_iterator<true>;
 	using const_iterator = vector_iterator<false>;
-	//default func constructor done
 	vector()noexcept;
 	//constructor func done
 	vector(const std::size_t capacity);
