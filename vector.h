@@ -367,6 +367,8 @@ public:
 //-----------------------
 
 //insert_element func done
+//this functions just insertst the element at the given position and
+//it shifts the element from index and after on position right 
 template<typename _Ty>
 template<class _Valty>
 void vector<_Ty>::insert_element(const std::size_t index, _Valty&& _Val) {
@@ -374,6 +376,9 @@ void vector<_Ty>::insert_element(const std::size_t index, _Valty&& _Val) {
 		push_back(std::forward<_Valty>(_Val));
 		return;
 	}
+	//if size==capacity we reallocate not enough space to move element
+	//this func may change the state of the vector:its capacity 
+	//if something goes wrong
 	if (_size == _capacity) {//realloc
 		_Ty** new_array = new _Ty * [2 * _capacity + 1] {};
 		for (std::size_t i = 0; i < _size; i++) {
@@ -391,10 +396,14 @@ void vector<_Ty>::insert_element(const std::size_t index, _Valty&& _Val) {
 	_size++;
 }
 //push_back_element func done
+//push_back pushes element at the top of the array of pointers
+//if we have the capacity or else we might need to allocate
+//a new array and copy pointers
 template<typename _Ty>
 template<class _Valty>
 void vector<_Ty>::push_back_element(_Valty&& _Val) {
 	if (_size == _capacity) {
+		//we realloc and copy pointers
 		std::size_t new_capacity = _capacity * 2 + 1;
 		_Ty** new_array = new _Ty * [new_capacity] {}; // zero-initialize
 
@@ -407,6 +416,8 @@ void vector<_Ty>::push_back_element(_Valty&& _Val) {
 		_array = new_array;
 		_capacity = new_capacity;
 	}
+	//this is like a static stack size is the pointer to  the top
+	//of the stack think of it like this
 	_array[_size] = new _Ty(std::forward<_Valty>(_Val)); // allocate new object
 	_size++;
 }
@@ -871,6 +882,8 @@ void vector<_Ty>::resize(const std::size_t new_size, const _Ty& value) {
 	}
 }
 //copy operator func done
+//same case as copy constructor but now if we have contents we delete 
+//if all goes good 
 template<typename _Ty>
 vector<_Ty>& vector<_Ty>::operator =(const vector<_Ty>& other)& {
 	static_assert(std::is_nothrow_destructible_v<_Ty>, "the type"
@@ -879,6 +892,7 @@ vector<_Ty>& vector<_Ty>::operator =(const vector<_Ty>& other)& {
 		this->~vector();
 		return *this;
 	}
+	//we create the new vector and we make copies of the elements
 	_Ty** new_array = new _Ty * [other._capacity] {};
 	std::size_t i{};
 	try {
@@ -887,13 +901,17 @@ vector<_Ty>& vector<_Ty>::operator =(const vector<_Ty>& other)& {
 		}
 	}
 	catch (...) {
+		//if something goes wrong we delete what we created and
+		//rethrow exception
 		for (std::size_t j = 0; j < i; j++) {
 			delete new_array[j];
 		}
 		delete[]new_array;
 		throw 1;
 	}
+	//if all goes good we get rid of what we had 
 	this->~vector();
+	//give the new array to our vector
 	_array = new_array;
 	_capacity = other._capacity;
 	_size = other._size;
@@ -911,6 +929,8 @@ void vector<_Ty>::assign(const std::size_t count, const _Ty& value) {
 		clear();
 		return;
 	}
+	//we create the new vector and make copies of the elements
+	//if all goes good we delete our contents and take the new_array
 	_Ty** new_array = new _Ty * [count] {};
 	std::size_t i{};
 	try {
@@ -919,6 +939,8 @@ void vector<_Ty>::assign(const std::size_t count, const _Ty& value) {
 		}
 	}
 	catch (...) {
+		//if something goes wrong we delete what we manage to create 
+		//so far and rethrow exception
 		for (std::size_t j = 0; j < i; j++) {
 			delete new_array[j];
 		}
@@ -931,6 +953,9 @@ void vector<_Ty>::assign(const std::size_t count, const _Ty& value) {
 
 }
 //move operator func done
+//move constructor we throw what we had and take what the other 
+//has moving into ourselves will cause a loss for our contents 
+//be very careful
 template<typename _Ty>
 vector<_Ty>& vector<_Ty>::operator =(vector<_Ty>&& other) & noexcept {
 	this->~vector();
@@ -947,18 +972,25 @@ _Ty** vector<_Ty>::data()noexcept {
 	return _array;
 }
 //implement one insert 
+//we pretty much insert the value at the given index if the index is valid
+//the object must be copy constructible
 template<typename _Ty>
 void vector<_Ty>::insert(const std::size_t index, const _Ty& value) {
 	static_assert(std::is_copy_constructible_v<_Ty>, "the type"
 		"must be copy constructible");
 	insert_element(index, value);
 }
+//implement one insert 
+//we pretty much insert the value at the given index if the index is valid
+//the object must be move constructible
 template<typename _Ty>
 void vector<_Ty>::insert(const std::size_t index, _Ty&& value) {
 	static_assert(std::is_move_constructible_v<_Ty>, "the type"
 		"must be move constructible");
 	insert_element(index, std::move(value));
 }
+//same case as insert but we construct the object in place
+//simple
 template<typename _Ty>
 template<class..._Valty>
 void vector<_Ty>::emplace(const std::size_t index, _Valty&&..._Val) {
@@ -982,7 +1014,8 @@ void vector<_Ty>::emplace(const std::size_t index, _Valty&&..._Val) {
 	_array[index] = ptr;
 	_size++;
 }
-//prosoxh stous invalid iteratos se pointers pou den yparxoun pleon
+//erase func just deletes the element at the given index and shifts the
+//elements at the index and after one position left 
 template<typename _Ty>
 void vector<_Ty>::erase(const std::size_t index)noexcept {
 	static_assert(std::is_nothrow_destructible_v<_Ty>, "the type"
@@ -997,6 +1030,7 @@ void vector<_Ty>::erase(const std::size_t index)noexcept {
 	_size--;
 }
 //begin func done
+//this is for the iterator structure see for yourself
 template<typename _Ty>
 vector<_Ty>::iterator vector<_Ty>::begin()noexcept {
 	return { 0,this };
@@ -1017,6 +1051,8 @@ vector<_Ty>::const_iterator vector<_Ty>::cend()noexcept {
 	return { _size,this };
 }
 //operator = func with initializer_list
+//this is exactly the same as copy operator but we have
+//initializer list  as argument
 template<typename _Ty>
 vector<_Ty>& vector<_Ty>::operator=(const std::initializer_list<_Ty>& other)& {
 	static_assert(std::is_copy_constructible_v<_Ty>, "the type must"
