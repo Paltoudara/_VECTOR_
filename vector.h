@@ -9,7 +9,7 @@
 #include<cassert>
 #include<functional>
 #include<memory>
-#include"Macros.h"
+#include"Header.h"
 _PANAGIOTIS_BEGIN
 //-----------------------
 //		INTERFACE BEGIN
@@ -301,6 +301,8 @@ public:
 	void assign(const std::size_t count, const _Ty& value);
 	//move operator func done
 	vector<_Ty>& operator =(vector<_Ty>&& other) & noexcept;
+	//
+	vector<_Ty>& operator =(const std::initializer_list<_Ty>& other)&;
 	// Returns a pointer to the internal array of pointers.
 	// The vector retains ownership of the objects.
 	// Users may read or modify the objects via the pointers, but must NOT delete them.
@@ -863,7 +865,7 @@ template<typename _Ty>
 void vector<_Ty>::erase(const std::size_t index)noexcept {
 	static_assert(std::is_nothrow_destructible_v<_Ty>, "the type"
 		"must be destructible without throwing");
-	if (index >= _size)return;
+	if (index >= _size) return;
 	delete _array[index];
 	//apo ekei kai pera shift
 	for (std::size_t i = index; i < _size - 1; i++) {
@@ -892,7 +894,38 @@ template<typename _Ty>
 vector<_Ty>::const_iterator vector<_Ty>::cend()noexcept {
 	return { _size,this };
 }
-
+//operator = func with initializer_list
+template<typename _Ty>
+vector<_Ty>& vector<_Ty>::operator=(const std::initializer_list<_Ty>&other)& {
+	static_assert(std::is_copy_constructible_v<_Ty>, "the type must"
+		"be copy constructible in order to use this func");
+	static_assert(std::is_nothrow_destructible_v<_Ty>, "the type"
+		"must be destructible without throwing");
+	if (other.size() == 0) {
+		this->~vector();
+		return *this;
+	}
+	_Ty** new_array = new _Ty * [other.size()] {};
+	const _Ty* ptr{ other.begin() };
+	std::size_t i{};
+	try {
+		for (; i < other.size(); i++) {
+			new_array[i] = new _Ty(*ptr);
+			ptr++;
+		}
+	}
+	catch (...) {
+		for (std::size_t j= 0; j < i; j++) {
+			delete new_array[j];
+		}
+		delete[]new_array;
+		throw 1;
+	}
+	this->~vector();
+	_array = new_array;
+	_capacity = _size = other.size();
+	return *this;
+}
 //-----------------------
 //		IMPLEMENTATION END
 //-----------------------
