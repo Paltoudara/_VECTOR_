@@ -128,8 +128,16 @@ THIS IS THE INTERFACE OF THE VECTOR WITH THIS INTERFACE YOU CAN MANIPULATE THE V
    
 6) capacity function just gives the capacity of the vector how many elements the vector currently can hold
 
-7) da
+7) empty functions just gives if the vector has size==0 or not simple
 
 8) size function just give the size of the  elements that are in the vector right now not how many can hold the vector itself
 
-8) 
+9) push_back just pushes  an element by copy or move to the vector, if the vector doesn't have enough capacity size==capacity then we reallocate a new vector that has capacity doubled over the previous if something goes wrong push_back does nothing (strong guarantee)
+
+10) emplace_back does the same thing as push_back the only difference is that it just constructs the element in place and then pushes it back simple
+
+11) pop_back just pops the last element from the vector reduces size by one and doesn't change the capacity no matter how many elements you pop, if you wanna change the capacity if you popped enough elements just use shrink_to_fit
+
+12) show justs prints all the elements in the vector uses this func if the elements are printable (we can call cout in them
+
+13)operator [] we use it just to access the vector and change its contents
