@@ -164,4 +164,6 @@ also this vector accepts only elements that are nothrow destructible.
     1. if the size==new_size then nothing happents
     2. if the size>new_size then we pop the elements from the vector we don't change the capacity
     3. if the size<new_size we push_back the default constructible objects of type _Ty if the new_size is greater than capacity we also reallocate space this func may change the state of the vector if something goes wrong see implementation
-23) resize function second overload
+23) resize function second overload does the same thing as the first overload but in the third scenario it pushes copy constructible objects of type _Ty on the vector
+
+24)
