@@ -187,4 +187,17 @@ Users may read or modify the objects via the pointers, but must NOT delete them.
 32) begin,cbegin,cend,end are there for the iterator interface
 
 # 🔗 ITERATOR API 🌐 :
-## 🧩 Interface
+# NOTE THAT USE MUST ONLY MAKE THE ITERATOR POINT TO A VALID VECTOR ON STACK DECLARED OR IN HEAP DO NOT USE AN ITERATOR WHEN IT IS INVALID MAKE IT POINT TO A VALID OBJECT ONLY OR THE BEHAVIOR IS UNDEFINED
+# ALSO THIS CLASS IS EXTREMELY LIGHTWEIGHT
+# MEMBER FUNCTIONS:
+1) default constructor initializes the default state of the iterator
+
+2) copy constructor which is =default function
+
+3) move constructor which is =default function
+
+4) copy operator  just makes iterator point where the other iterator is pointing
+
+5) move operator just makes iterator point where the other iterator is pointing again
+
+6) OPERATOR ++ INCREASES THE POSITION OF ITERATOR BY ONE IF IT IN THE RANGE [0,SIZE-1] OF THE VECTOR THAT IT POINTS
