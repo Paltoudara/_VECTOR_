@@ -115,6 +115,7 @@ public:
 ```
 # NOTE THAT:
 THIS IS THE INTERFACE OF THE VECTOR WITH THIS INTERFACE YOU CAN MANIPULATE THE VECTOR AND CAN USE IT IF YOU WANT MORE DETAILS ABOUT THE IMPLEMENTATION JUST SEE THE vector.h and Macros.h for how things are done
+also this vector accepts only elements that are nothrow destructible.
 
 1) default constructor just initializes the vector pretty much the default state of the vector: no elements no capacity no size
 
@@ -140,4 +141,12 @@ THIS IS THE INTERFACE OF THE VECTOR WITH THIS INTERFACE YOU CAN MANIPULATE THE V
 
 12) show justs prints all the elements in the vector uses this func if the elements are printable (we can call cout in them
 
-13)operator [] we use it just to access the vector and change its contents
+13) operator [] we use it just to access the vector and change its contents this doesn't check in release if you passed valid index(use with care)
+
+14) at func this func we use it for the same purpose as operator [] but we check if the index is valid and then we throw for invalid indexes
+
+15) destructor justs destroys the vector and frees the memory and all the size=capacity=0\
+
+16) clear func it just deletes all the elements in the vector but doesn't affect capacity it justs affects size and makes it 0
+
+17) front func it justs give the first element of the vector 
