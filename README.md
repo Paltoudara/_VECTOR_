@@ -5,11 +5,8 @@
 ```markdown
 ```cpp
 template<typename _Ty>
-</br>
 class vector final{
-</br>
 public:
-</br>
 	using iterator = vector_iterator<true>;
 	</br>
 	using const_iterator = vector_iterator<false>;
