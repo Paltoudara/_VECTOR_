@@ -122,9 +122,10 @@ also this vector accepts only elements that are nothrow destructible.
 
 2) a constructor that takes a capacity argument and just gives the vector this capacity or one if the capacity arg is equal to 0
 
-3) this is the copy constructor that just  copies all the contents from other (this is a deep copy) also the vector takes the size and capacity of other
+3) this is the copy constructor that just  copies all the contents from other (this is a deep copy) also the vector takes the size and capacity of other if something goes wrong the vector is left in the default state
 
-4) this is pretty much the same case as above but this time we have an initializer list and we take copies of the values of the initializer list
+4) this is pretty much the same case as above but this time we have an initializer list and we take copies of the values of the initializer list if something goes wrong the vector is left in the default state
+
 
 5) this is the move constructor we just steal the contets of the other and we leave it in a valid state it is just a vector with zero capacity and size
    
