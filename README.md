@@ -135,7 +135,7 @@ also this vector accepts only elements that are nothrow destructible.
 
 8) size function just gives the size of the  elements that are in the vector right now not how many can hold the vector itself
 
-9) push_back just pushes  an element by copy or move to the vector, if the vector doesn't have enough capacity size==capacity then we reallocate a new vector that has capacity doubled over the previous, if something goes wrong push_back does nothing (strong guarantee)
+9) push_back just pushes  an element by copy or move to the vector, if the vector doesn't have enough capacity size==capacity then we reallocate a new vector that has capacity doubled over the previous, if something goes wrong push_back may change the capacity of the vector
 
 10) emplace_back does the same thing as push_back the only difference is that it just constructs the element in place and then pushes it back, simple
 
